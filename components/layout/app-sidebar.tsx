@@ -68,6 +68,8 @@ const menuItems: MenuItemType[] = [
     icon: <FolderOpen className="h-4 w-4" />,
     children: [
       { label: "项目发布查询", href: "/admin/projects", icon: <FileText className="h-4 w-4" /> },
+      { label: "项目立项申报", href: "/admin/project-application", icon: <FileSignature className="h-4 w-4" /> },
+      { label: "立项申报审核", href: "/admin/project-application-review", icon: <ClipboardCheck className="h-4 w-4" /> },
       { label: "项目类型管理", href: "/admin/project-types", icon: <Settings className="h-4 w-4" /> },
       { label: "学校/组织管理", href: "/admin/organizations", icon: <Building2 className="h-4 w-4" /> },
       { label: "规则模板管理", href: "/admin/rule-templates", icon: <ClipboardList className="h-4 w-4" /> },
