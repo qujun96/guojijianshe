@@ -21,8 +21,62 @@ import { AIAssistantPanel } from "@/components/ai/ai-assistant-panel"
 import { AIPolishButton } from "@/components/ai/ai-polish-panel"
 import { 
   ArrowLeft, Calendar, Sparkles, FileText, Settings, CheckCircle2, 
-  ChevronRight, ChevronLeft, Plus, X, Eye, Cog
+  ChevronRight, ChevronLeft, Plus, X, Eye, Cog, Search, Users, Building2
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+// 已通过审核的立项申报项目（模拟数据）
+const approvedApplications = [
+  {
+    id: "PA202403001",
+    projectName: "剑桥大学工程学暑期交流项目",
+    applyUnit: "电气工程学院",
+    applicant: "张伟教授",
+    applyTime: "2024-03-15",
+    startDate: "2024-07-01",
+    endDate: "2024-07-30",
+    totalStudents: 30,
+    totalCost: 975000,
+  },
+  {
+    id: "PA202403002",
+    projectName: "牛津大学人工智能研修班",
+    applyUnit: "信息工程学院",
+    applicant: "陈明教授",
+    applyTime: "2024-03-14",
+    startDate: "2024-08-01",
+    endDate: "2024-08-25",
+    totalStudents: 25,
+    totalCost: 850000,
+  },
+  {
+    id: "PA202403003",
+    projectName: "哈佛大学经济管理项目",
+    applyUnit: "管理学院",
+    applicant: "刘芳副教授",
+    applyTime: "2024-03-13",
+    startDate: "2024-07-15",
+    endDate: "2024-08-15",
+    totalStudents: 20,
+    totalCost: 720000,
+  },
+  {
+    id: "PA202403004",
+    projectName: "慕尼黑工业大学交换项目",
+    applyUnit: "机械工程学院",
+    applicant: "王磊教授",
+    applyTime: "2024-03-12",
+    startDate: "2024-09-01",
+    endDate: "2024-12-31",
+    totalStudents: 15,
+    totalCost: 580000,
+  },
+]
 
 // 判断字段选项（来源于学生申请时填写的信息）
 const fieldOptions = [
@@ -114,11 +168,47 @@ export default function ProjectPublishPage() {
   const [projectName, setProjectName] = useState("")
   const [projectIntro, setProjectIntro] = useState("")
   const [projectType, setProjectType] = useState("")
+  const [projectLevel, setProjectLevel] = useState("") // 项目级别
   const [duration, setDuration] = useState("short")
   const [applyMethod, setApplyMethod] = useState("online")
   const [isTop200, setIsTop200] = useState<string>("")
   const [applyTarget, setApplyTarget] = useState("")
   const [materialDeadline, setMaterialDeadline] = useState("")
+  
+  // 时间安排
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [applyDeadline, setApplyDeadline] = useState("")
+  
+  // 关联立项申报弹窗
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false)
+  const [applicationSearchKeyword, setApplicationSearchKeyword] = useState("")
+  const [selectedApplication, setSelectedApplication] = useState<typeof approvedApplications[0] | null>(null)
+  
+  // 筛选已通过审核的立项申报
+  const filteredApplications = approvedApplications.filter(app => 
+    app.projectName.includes(applicationSearchKeyword) || 
+    app.applyUnit.includes(applicationSearchKeyword)
+  )
+  
+  // 选择立项申报项目
+  const handleSelectApplication = (app: typeof approvedApplications[0]) => {
+    setSelectedApplication(app)
+    setProjectName(app.projectName)
+    setStartDate(app.startDate)
+    setEndDate(app.endDate)
+    setShowApplicationDialog(false)
+  }
+  
+  // 处理项目级别变化
+  const handleProjectLevelChange = (value: string) => {
+    setProjectLevel(value)
+    if (value === "department") {
+      setShowApplicationDialog(true)
+    } else {
+      setSelectedApplication(null)
+    }
+  }
   
   // Step 2: Pre-review Rules
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
@@ -334,6 +424,63 @@ export default function ProjectPublishPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>
+                        <span className="text-destructive">*</span> 项目级别
+                      </Label>
+                      <Select value={projectLevel} onValueChange={handleProjectLevelChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择项目级别" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="department">处部/学院级项目</SelectItem>
+                          <SelectItem value="national">国家/校级项目</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* 已关联的立项申报信息 */}
+                  {selectedApplication && projectLevel === "department" && (
+                    <Card className="bg-blue-50/50 border-blue-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2 text-primary">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm font-medium">已关联立项申报</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-7 text-xs"
+                            onClick={() => setShowApplicationDialog(true)}
+                          >
+                            更换
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">项目名称：</span>
+                            <span className="text-primary font-medium">{selectedApplication.projectName}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">申报单位：</span>
+                            <span>{selectedApplication.applyUnit}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">申报人：</span>
+                            <span>{selectedApplication.applicant}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">预算金额：</span>
+                            <span className="text-primary">¥{selectedApplication.totalCost.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>
                         <span className="text-destructive">*</span> 项目时长
                       </Label>
                       <div className="flex gap-2">
@@ -358,6 +505,9 @@ export default function ProjectPublishPage() {
 
                 <section className="space-y-4">
                   <h2 className="font-medium text-sm text-muted-foreground">时间安排</h2>
+                  {selectedApplication && projectLevel === "department" && (
+                    <p className="text-xs text-primary">* 已从关联的立项申报中自动填充时间信息</p>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -366,11 +516,21 @@ export default function ProjectPublishPage() {
                       </Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <Input type="date" placeholder="开始时间" />
+                          <Input 
+                            type="date" 
+                            placeholder="开始时间" 
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                          />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
                         <div className="relative flex-1">
-                          <Input type="date" placeholder="结束时间" />
+                          <Input 
+                            type="date" 
+                            placeholder="结束时间" 
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                          />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
                       </div>
@@ -380,7 +540,12 @@ export default function ProjectPublishPage() {
                         <span className="text-destructive">*</span> 报名截止时间
                       </Label>
                       <div className="relative">
-                        <Input type="datetime-local" placeholder="请选择报名截止时间" />
+                        <Input 
+                          type="datetime-local" 
+                          placeholder="请选择报名截止时间" 
+                          value={applyDeadline}
+                          onChange={(e) => setApplyDeadline(e.target.value)}
+                        />
                         <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                       </div>
                     </div>
@@ -867,6 +1032,107 @@ export default function ProjectPublishPage() {
           </div>
         </div>
       </AIAssistantPanel>
+
+      {/* 选择立项申报弹窗 */}
+      <Dialog open={showApplicationDialog} onOpenChange={setShowApplicationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              查询已通过审核的立项申报
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="请输入项目名称或申报单位关键词..."
+                  className="pl-9"
+                  value={applicationSearchKeyword}
+                  onChange={(e) => setApplicationSearchKeyword(e.target.value)}
+                />
+              </div>
+              <Button>
+                <Search className="h-4 w-4 mr-1" />
+                搜索
+              </Button>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              可关联的立项申报（点击选择）
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {filteredApplications.map((app) => (
+                <Card 
+                  key={app.id} 
+                  className={`cursor-pointer transition-colors hover:border-primary ${
+                    selectedApplication?.id === app.id ? "border-primary bg-primary/5" : ""
+                  }`}
+                  onClick={() => handleSelectApplication(app)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-primary">{app.projectName}</span>
+                          <Badge variant="outline" className="text-green-600 border-green-300">已通过</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5" />
+                            {app.applyUnit}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            {app.applicant}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            申报时间：{app.applyTime}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span>
+                            派出时间：<span className="text-primary">{app.startDate}</span> 至 <span className="text-primary">{app.endDate}</span>
+                          </span>
+                          <span>
+                            预计人数：<span className="font-medium">{app.totalStudents}人</span>
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm"
+                        variant={selectedApplication?.id === app.id ? "default" : "outline"}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSelectApplication(app)
+                        }}
+                      >
+                        选择
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {filteredApplications.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  没有找到匹配的立项申报项目
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowApplicationDialog(false)}>
+                取消
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
