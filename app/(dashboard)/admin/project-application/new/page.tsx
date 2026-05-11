@@ -102,9 +102,13 @@ export default function NewProjectApplicationPage() {
   
   // 经费预算
   const [costPerStudent, setCostPerStudent] = useState("")
+  const [budgetStudentCount, setBudgetStudentCount] = useState("") // 基础预算学生人数
   const [schoolFundPerStudent, setSchoolFundPerStudent] = useState("")
+  const [schoolFundStudentCount, setSchoolFundStudentCount] = useState("") // 学校经费学生人数
   const [unitFundPerStudent, setUnitFundPerStudent] = useState("")
+  const [unitFundStudentCount, setUnitFundStudentCount] = useState("") // 单位配套学生人数
   const [selfFundPerStudent, setSelfFundPerStudent] = useState("")
+  const [selfFundStudentCount, setSelfFundStudentCount] = useState("") // 学生自筹人数
   const [expenseIncludes, setExpenseIncludes] = useState("1. 国际旅费：往返机票及境外市内交通\n2. 住宿费：项目期间的住宿费用\n3. 生活费：餐饮、交通等日常开销\n4. 注册费：项目注册及相关学费\n5. 保险费：境外意外医疗保险")
   const [expenseExcludes, setExpenseExcludes] = useState("1. 护照办理及签证申请费用\n2. 学生从所在地至出发口岸的往返交通费用\n3. 学生个人消费（如购物、娱乐等）\n4. 因个人原因导致的额外费用\n5. 行李超重费用")
 
@@ -119,12 +123,16 @@ export default function NewProjectApplicationPage() {
     }
   }, [startDate, endDate])
 
-  // 计算费用
-  const studentCount = parseInt(totalStudents) || 0
-  const totalCost = (parseFloat(costPerStudent) || 0) * studentCount
-  const schoolFundTotal = (parseFloat(schoolFundPerStudent) || 0) * studentCount
-  const unitFundTotal = (parseFloat(unitFundPerStudent) || 0) * studentCount
-  const selfFundTotal = (parseFloat(selfFundPerStudent) || 0) * studentCount
+  // 计算费用 - 每个预算项使用各自独立的学生人数
+  const budgetCount = parseInt(budgetStudentCount) || 0
+  const schoolCount = parseInt(schoolFundStudentCount) || 0
+  const unitCount = parseInt(unitFundStudentCount) || 0
+  const selfCount = parseInt(selfFundStudentCount) || 0
+  
+  const totalCost = (parseFloat(costPerStudent) || 0) * budgetCount
+  const schoolFundTotal = (parseFloat(schoolFundPerStudent) || 0) * schoolCount
+  const unitFundTotal = (parseFloat(unitFundPerStudent) || 0) * unitCount
+  const selfFundTotal = (parseFloat(selfFundPerStudent) || 0) * selfCount
   const publicFundTotal = schoolFundTotal + unitFundTotal
   const schoolFundPercent = publicFundTotal > 0 ? Math.round((schoolFundTotal / publicFundTotal) * 100) : 0
   const unitFundPercent = publicFundTotal > 0 ? 100 - schoolFundPercent : 0
@@ -378,7 +386,7 @@ export default function NewProjectApplicationPage() {
                         <p className="text-sm font-medium">{relatedProject.applyTime}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-primary mb-1">原项目学生人数</p>
+                        <p className="text-xs text-primary mb-1">原项目���生人数</p>
                         <p className="text-sm font-medium">{relatedProject.students}人</p>
                       </div>
                     </div>
@@ -576,6 +584,7 @@ export default function NewProjectApplicationPage() {
               <Label className="text-foreground whitespace-nowrap">项目费用</Label>
               <Input 
                 className="w-32" 
+                type="number"
                 placeholder="20000"
                 value={costPerStudent}
                 onChange={(e) => setCostPerStudent(e.target.value)}
@@ -583,9 +592,11 @@ export default function NewProjectApplicationPage() {
               <span className="text-muted-foreground">元/生</span>
               <span className="text-muted-foreground">，预计</span>
               <Input 
-                className="w-24 bg-muted" 
-                value={totalStudents || "0"} 
-                disabled 
+                className="w-24" 
+                type="number"
+                placeholder="30"
+                value={budgetStudentCount}
+                onChange={(e) => setBudgetStudentCount(e.target.value)}
               />
               <span className="text-muted-foreground">名学生，共计</span>
               <Input 
@@ -640,6 +651,7 @@ export default function NewProjectApplicationPage() {
                   <Label className="text-foreground whitespace-nowrap">申请学校经费</Label>
                   <Input 
                     className="w-32" 
+                    type="number"
                     placeholder="20000"
                     value={schoolFundPerStudent}
                     onChange={(e) => setSchoolFundPerStudent(e.target.value)}
@@ -647,9 +659,11 @@ export default function NewProjectApplicationPage() {
                   <span className="text-muted-foreground">元/生</span>
                   <span className="text-muted-foreground">，预计</span>
                   <Input 
-                    className="w-24 bg-muted" 
-                    value={totalStudents || "0"} 
-                    disabled 
+                    className="w-24" 
+                    type="number"
+                    placeholder="30"
+                    value={schoolFundStudentCount}
+                    onChange={(e) => setSchoolFundStudentCount(e.target.value)}
                   />
                   <span className="text-muted-foreground">名学生，共计</span>
                   <Input 
@@ -667,6 +681,7 @@ export default function NewProjectApplicationPage() {
                   <Label className="text-foreground whitespace-nowrap">本单位配套经费</Label>
                   <Input 
                     className="w-32" 
+                    type="number"
                     placeholder="8000"
                     value={unitFundPerStudent}
                     onChange={(e) => setUnitFundPerStudent(e.target.value)}
@@ -674,9 +689,11 @@ export default function NewProjectApplicationPage() {
                   <span className="text-muted-foreground">元/生</span>
                   <span className="text-muted-foreground">，预计</span>
                   <Input 
-                    className="w-24 bg-muted" 
-                    value={totalStudents || "0"} 
-                    disabled 
+                    className="w-24" 
+                    type="number"
+                    placeholder="30"
+                    value={unitFundStudentCount}
+                    onChange={(e) => setUnitFundStudentCount(e.target.value)}
                   />
                   <span className="text-muted-foreground">名学生，共计</span>
                   <Input 
@@ -694,12 +711,21 @@ export default function NewProjectApplicationPage() {
                   <Label className="text-foreground whitespace-nowrap">学生自筹</Label>
                   <Input 
                     className="w-32" 
+                    type="number"
                     placeholder="4500"
                     value={selfFundPerStudent}
                     onChange={(e) => setSelfFundPerStudent(e.target.value)}
                   />
                   <span className="text-muted-foreground">元/生</span>
-                  <span className="text-muted-foreground">，共计</span>
+                  <span className="text-muted-foreground">，预计</span>
+                  <Input 
+                    className="w-24" 
+                    type="number"
+                    placeholder="30"
+                    value={selfFundStudentCount}
+                    onChange={(e) => setSelfFundStudentCount(e.target.value)}
+                  />
+                  <span className="text-muted-foreground">名学生，共计</span>
                   <Input 
                     className="w-32 bg-blue-50 text-primary font-medium" 
                     value={selfFundTotal.toLocaleString()} 
