@@ -396,84 +396,12 @@ export default function NewProjectApplicationPage() {
         </CardContent>
       </Card>
 
-      {/* 模块2：项目概述 */}
+      {/* 模块2：联合申报单位信息 */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
               2
-            </div>
-            <h2 className="text-base font-semibold">项目概述</h2>
-          </div>
-          <div className="h-px bg-primary mb-6" />
-
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">立项背景</Label>
-              <Textarea 
-                placeholder="请详细描述项目立项的背景、意义和必要性" 
-                rows={4}
-                value={background}
-                onChange={(e) => setBackground(e.target.value)}
-              />
-              <p className="text-xs text-primary">包括项目的政策背景、国内外现状、实施的必要性等</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">拟合作方基本情况</Label>
-              <Textarea 
-                placeholder="请详细描述拟合作单位的基本情况及合作优势" 
-                rows={4}
-                value={partnerInfo}
-                onChange={(e) => setPartnerInfo(e.target.value)}
-              />
-              <p className="text-xs text-primary">包括合作方的学术地位、研究实力、合作历史、合作优势等</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">预期成果与目标</Label>
-              <Textarea 
-                placeholder="请描述项目预期达成的成果和目标" 
-                rows={4}
-                value={expectedOutcome}
-                onChange={(e) => setExpectedOutcome(e.target.value)}
-              />
-              <p className="text-xs text-primary">包括人才培养目标、学术成果预期、合作交流目标等可量化指标</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 模块3：项目完成标准 */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-              3
-            </div>
-            <h2 className="text-base font-semibold">项目完成标准</h2>
-          </div>
-          <div className="h-px bg-primary mb-6" />
-
-          <div className="space-y-2">
-            <Label className="text-foreground font-medium">完成标准</Label>
-            <Textarea 
-              placeholder="请明确项目完成的考核标准和指标" 
-              rows={4}
-              value={completionStandard}
-              onChange={(e) => setCompletionStandard(e.target.value)}
-            />
-            <p className="text-xs text-primary">请量化完成指标，如：发表论文数量、参与人数、培训人次等</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 模块4：联合申报单位信息 */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-              4
             </div>
             <h2 className="text-base font-semibold">联合申报单位信息</h2>
           </div>
@@ -550,6 +478,78 @@ export default function NewProjectApplicationPage() {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 模块3：项目概述 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+              3
+            </div>
+            <h2 className="text-base font-semibold">项目概述</h2>
+          </div>
+          <div className="h-px bg-primary mb-6" />
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">立项背景</Label>
+              <Textarea 
+                placeholder="请详细描述项目立项的背景、意义和必要性" 
+                rows={4}
+                value={background}
+                onChange={(e) => setBackground(e.target.value)}
+              />
+              <p className="text-xs text-primary">包括项目的政策背景、国内外现状、实施的必要性等</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">拟合作方基本情况</Label>
+              <Textarea 
+                placeholder="请详细描述拟合作单位的基本情况及合作优势" 
+                rows={4}
+                value={partnerInfo}
+                onChange={(e) => setPartnerInfo(e.target.value)}
+              />
+              <p className="text-xs text-primary">包括合作方的学术地位、研究实力、合作历史、合作优势等</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">预期成果与目标</Label>
+              <Textarea 
+                placeholder="请描述项目预期达成的成果和目标" 
+                rows={4}
+                value={expectedOutcome}
+                onChange={(e) => setExpectedOutcome(e.target.value)}
+              />
+              <p className="text-xs text-primary">包括人才培养目标、学术成果预期、合作交流目标等可量化指标</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 模块4：项目完成标准 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+              4
+            </div>
+            <h2 className="text-base font-semibold">项目完成标准</h2>
+          </div>
+          <div className="h-px bg-primary mb-6" />
+
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">完成标准</Label>
+            <Textarea 
+              placeholder="请明确项目完成的考核标准和指标" 
+              rows={4}
+              value={completionStandard}
+              onChange={(e) => setCompletionStandard(e.target.value)}
+            />
+            <p className="text-xs text-primary">请量化完成指标，如：发表论文数量、参与人数、培训人次等</p>
           </div>
         </CardContent>
       </Card>
