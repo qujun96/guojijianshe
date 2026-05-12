@@ -34,7 +34,7 @@ import {
 const approvedApplications = [
   {
     id: "PA202403001",
-    projectName: "剑桥大学工程学暑期交流项目",
+    projectName: "G国H大学工程学暑期交流项目",
     applyUnit: "电气工程学院",
     applicant: "张伟教授",
     applyTime: "2024-03-15",
@@ -45,7 +45,7 @@ const approvedApplications = [
   },
   {
     id: "PA202403002",
-    projectName: "牛津大学人工智能研修班",
+    projectName: "G国I大学人工智能研修班",
     applyUnit: "信息工程学院",
     applicant: "陈明教授",
     applyTime: "2024-03-14",
@@ -56,7 +56,7 @@ const approvedApplications = [
   },
   {
     id: "PA202403003",
-    projectName: "哈佛大学经济管理项目",
+    projectName: "A国J大学经济管理项目",
     applyUnit: "管理学院",
     applicant: "刘芳副教授",
     applyTime: "2024-03-13",
@@ -67,7 +67,7 @@ const approvedApplications = [
   },
   {
     id: "PA202403004",
-    projectName: "慕尼黑工业大学交换项目",
+    projectName: "K国L大学交换项目",
     applyUnit: "机械工程学院",
     applicant: "王磊教授",
     applyTime: "2024-03-12",
@@ -645,12 +645,12 @@ export default function ProjectPublishPage() {
                           <SelectValue placeholder="请选择国家/地区" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="uk">英国</SelectItem>
-                          <SelectItem value="us">美国</SelectItem>
-                          <SelectItem value="de">德国</SelectItem>
-                          <SelectItem value="jp">日本</SelectItem>
-                          <SelectItem value="kr">韩国</SelectItem>
-                          <SelectItem value="au">澳大利亚</SelectItem>
+                          <SelectItem value="g-country">G国</SelectItem>
+                          <SelectItem value="a-country">A国</SelectItem>
+                          <SelectItem value="k-country">K国</SelectItem>
+                          <SelectItem value="c-country">C国</SelectItem>
+                          <SelectItem value="kr">A国</SelectItem>
+                          <SelectItem value="r-country">R国</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -663,10 +663,10 @@ export default function ProjectPublishPage() {
                           <SelectValue placeholder="请选择学校/组织" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cambridge">剑桥大学</SelectItem>
-                          <SelectItem value="oxford">牛津大学</SelectItem>
-                          <SelectItem value="mit">麻省理工学院</SelectItem>
-                          <SelectItem value="tum">慕尼黑工业大学</SelectItem>
+                          <SelectItem value="cambridge">G国H大学</SelectItem>
+                          <SelectItem value="oxford">G国I大学</SelectItem>
+                          <SelectItem value="mit">A国N大学学院</SelectItem>
+                          <SelectItem value="tum">K国L大学</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1024,7 +1024,7 @@ export default function ProjectPublishPage() {
             </div>
           </div>
           <div className="border rounded-lg p-3 space-y-2">
-            <h4 className="font-medium text-sm">2025寒假韩国建国大学项目</h4>
+            <h4 className="font-medium text-sm">2025寒假A国建国大学项目</h4>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span>报名: <span className="font-medium text-foreground">47人</span></span>
               <span>通过率: <span className="font-medium text-foreground">81%</span></span>

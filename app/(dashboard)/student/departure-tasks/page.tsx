@@ -139,7 +139,7 @@ export default function DepartureTasksPage() {
     studentId: "2022010001",
     type: "本科生",
     college: "计算机科学与技术学院",
-    project: "2026年《中美人才培养计划》1+2+1双学位项目"
+    project: "2026年《A国B国人才培养计划》1+2+1双学位项目"
   }
 
   return (

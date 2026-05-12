@@ -38,7 +38,7 @@ import {
 const historyProjects = [
   {
     id: "HP001",
-    name: "剑桥大学工程学暑期交流项目",
+    name: "G国H大学工程学暑期交流项目",
     leader: "张伟教授",
     applyTime: "2023-03-10",
     students: 25,
@@ -46,7 +46,7 @@ const historyProjects = [
   },
   {
     id: "HP002",
-    name: "麻省理工联合培养计划",
+    name: "A国N大学联合培养计划",
     leader: "王芳副教授",
     applyTime: "2023-05-20",
     students: 15,
@@ -54,7 +54,7 @@ const historyProjects = [
   },
   {
     id: "HP003",
-    name: "新加坡国立大学短期交流项目",
+    name: "P国Q大学短期交流项目",
     leader: "李强教授",
     applyTime: "2023-09-15",
     students: 20,

@@ -161,7 +161,7 @@ export default function StudentsListPage() {
               <div className="flex-1">
                 <h1 className="text-lg font-semibold">学生名单管理</h1>
                 <p className="text-sm text-muted-foreground">
-                  韩国忠南大学奖学金交换生项目(2026) - 项目编号：PRJ-{params.id}-2026
+                  A国B大学奖学金交换生项目(2026) - 项目编号：PRJ-{params.id}-2026
                 </p>
               </div>
               <Button variant="outline" className="gap-2">

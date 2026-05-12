@@ -145,7 +145,7 @@ export default function DispatchMaterialsPage() {
             <div className="flex items-center justify-between mb-6 p-4 bg-muted rounded-lg">
               <div>
                 <div className="text-sm text-muted-foreground">当前项目</div>
-                <div className="font-medium mt-1">剑桥大学2026寒假短期课程项目</div>
+                <div className="font-medium mt-1">G国H大学2026寒假短期课程项目</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-muted-foreground">派出时间</div>

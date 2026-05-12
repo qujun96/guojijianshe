@@ -23,7 +23,7 @@ const notifications = [
     id: 1,
     type: "task",
     title: "新的审批任务",
-    content: "您有3个新的申请待审核，来自韩国忠南大学交换项目",
+    content: "您有3个新的申请待审核，来自A国B大学交换项目",
     time: "10分钟前",
     unread: true,
     link: "/mobile/tasks"
@@ -57,7 +57,7 @@ const notifications = [
     id: 5,
     type: "reminder",
     title: "材料截止提醒",
-    content: "韩国忠南大学项目材料提交截止日期还有7天",
+    content: "A国B大学项目材料提交截止日期还有7天",
     time: "昨天",
     unread: false,
   },

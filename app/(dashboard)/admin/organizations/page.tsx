@@ -39,14 +39,14 @@ const organizations = [
   {
     id: 1,
     code: "US001",
-    name: "哈佛大学",
+    name: "A国J大学",
     nameEn: "Harvard University",
-    country: "美国",
+    country: "A国",
     region: "北美洲",
     type: "综合性大学",
     ranking: 3,
     isTop200: true,
-    description: "世界顶尖私立研究型大学，位于美国马萨诸塞州剑桥市。以其卓越的学术声誉、顶级的师资力量和丰富的研究资源闻名全球。",
+    description: "世界顶尖私立研究型大学，位于A国某州某市。以其卓越的学术声誉、顶级的师资力量和丰富的研究资源闻名全球。",
     cooperationStart: "2018-09-01",
     projectCount: 5,
     studentCount: 45,
@@ -56,14 +56,14 @@ const organizations = [
   {
     id: 2,
     code: "UK001",
-    name: "剑桥大学",
+    name: "G国H大学",
     nameEn: "University of Cambridge",
-    country: "英国",
+    country: "G国",
     region: "欧洲",
     type: "综合性大学",
     ranking: 2,
     isTop200: true,
-    description: "英国历史最悠久的大学之一，世界著名的公立研究型大学，以其卓越的学术成就和严谨的学风著称。",
+    description: "G国历史最悠久的大学之一，世界著名的公立研究型大学，以其卓越的学术成就和严谨的学风著称。",
     cooperationStart: "2019-03-15",
     projectCount: 4,
     studentCount: 38,
@@ -73,14 +73,14 @@ const organizations = [
   {
     id: 3,
     code: "JP001",
-    name: "东京大学",
+    name: "C国Y大学",
     nameEn: "The University of Tokyo",
-    country: "日本",
+    country: "C国",
     region: "亚洲",
     type: "综合性大学",
     ranking: 28,
     isTop200: true,
-    description: "日本最高学术殿堂和帝国大学之首，在全球享有极高的声誉，是亚洲顶尖的研究型综合大学。",
+    description: "C国最高学术殿堂和帝国大学之首，在全球享有极高的声誉，是亚洲顶尖的研究型综合大学。",
     cooperationStart: "2020-01-10",
     projectCount: 6,
     studentCount: 52,
@@ -92,12 +92,12 @@ const organizations = [
     code: "KR001",
     name: "首尔大学",
     nameEn: "Seoul National University",
-    country: "韩国",
+    country: "A国",
     region: "亚洲",
     type: "综合性大学",
     ranking: 41,
     isTop200: true,
-    description: "韩国最具代表性的国立综合研究型大学，在韩国享有最高学府的美誉。",
+    description: "A国最具代表性的国立综合研究型大学，在A国享有最高学府的美誉。",
     cooperationStart: "2021-05-20",
     projectCount: 3,
     studentCount: 28,
@@ -107,14 +107,14 @@ const organizations = [
   {
     id: 5,
     code: "DE001",
-    name: "慕尼黑工业大学",
+    name: "K国L大学",
     nameEn: "Technical University of Munich",
-    country: "德国",
+    country: "K国",
     region: "欧洲",
     type: "理工类大学",
     ranking: 37,
     isTop200: true,
-    description: "德国最古老的工业大学之一，欧洲顶尖的理工科大学，以工程和自然科学见长。",
+    description: "K国最古老的工业大学之一，欧洲顶尖的理工科大学，以工程和自然科学见长。",
     cooperationStart: "2020-09-01",
     projectCount: 2,
     studentCount: 15,
@@ -185,14 +185,14 @@ export default function OrganizationsPage() {
                             <SelectValue placeholder="请选择国家" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="usa">美国</SelectItem>
-                            <SelectItem value="uk">英国</SelectItem>
-                            <SelectItem value="japan">日本</SelectItem>
-                            <SelectItem value="korea">韩国</SelectItem>
-                            <SelectItem value="germany">德国</SelectItem>
-                            <SelectItem value="france">法国</SelectItem>
-                            <SelectItem value="australia">澳大利亚</SelectItem>
-                            <SelectItem value="canada">加拿大</SelectItem>
+                            <SelectItem value="a-country">A国</SelectItem>
+                            <SelectItem value="g-country">G国</SelectItem>
+                            <SelectItem value="c-country">C国</SelectItem>
+                            <SelectItem value="a-country">A国</SelectItem>
+                            <SelectItem value="k-country">K国</SelectItem>
+                            <SelectItem value="f-country">F国</SelectItem>
+                            <SelectItem value="r-country">R国</SelectItem>
+                            <SelectItem value="v-country">V国</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -296,11 +296,11 @@ export default function OrganizationsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部国家</SelectItem>
-                  <SelectItem value="usa">美国</SelectItem>
-                  <SelectItem value="uk">英国</SelectItem>
-                  <SelectItem value="japan">日本</SelectItem>
-                  <SelectItem value="korea">韩国</SelectItem>
-                  <SelectItem value="germany">德国</SelectItem>
+                  <SelectItem value="a-country">A国</SelectItem>
+                  <SelectItem value="g-country">G国</SelectItem>
+                  <SelectItem value="c-country">C国</SelectItem>
+                  <SelectItem value="a-country">A国</SelectItem>
+                  <SelectItem value="k-country">K国</SelectItem>
                 </SelectContent>
               </Select>
               <Select>

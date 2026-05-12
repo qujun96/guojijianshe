@@ -35,7 +35,7 @@ import {
 const approvedApplications = [
   {
     id: "PA202403001",
-    projectName: "剑桥大学工程学暑期交流项目",
+    projectName: "G国H大学工程学暑期交流项目",
     applyUnit: "电气工程学院",
     applicant: "张伟教授",
     applyTime: "2024-03-15",
@@ -46,7 +46,7 @@ const approvedApplications = [
   },
   {
     id: "PA202403002",
-    projectName: "牛津大学人工智能研修班",
+    projectName: "G国I大学人工智能研修班",
     applyUnit: "信息工程学院",
     applicant: "陈明教授",
     applyTime: "2024-03-14",
@@ -57,7 +57,7 @@ const approvedApplications = [
   },
   {
     id: "PA202403003",
-    projectName: "哈佛大学经济管理项目",
+    projectName: "A国J大学经济管理项目",
     applyUnit: "管理学院",
     applicant: "刘芳副教授",
     applyTime: "2024-03-13",
@@ -73,8 +73,8 @@ export default function ProjectEditPage() {
   const [activeTab, setActiveTab] = useState<"basic" | "rules">("basic")
   
   // 预填充现有数据
-  const [projectName, setProjectName] = useState("韩国忠南大学奖学金交换生项目(2026)")
-  const [projectIntro, setProjectIntro] = useState("韩国忠南大学奖学金交换生项目是我校与韩国忠南大学合作开展的交换生项目。该项目为期一个学期，学生可在韩国忠南大学选修课程，获得的学分可按规定进行转换。项目提供部分奖学金资助，包括学费减免和生活补贴。")
+  const [projectName, setProjectName] = useState("A国B大学奖学金交换生项目(2026)")
+  const [projectIntro, setProjectIntro] = useState("A国B大学奖学金交换生项目是我校与A国B大学合作开展的交换生项目。该项目为期一个学期，学生可在A国B大学选修课程，获得的学分可按规定进行转换。项目提供部分奖学金资助，包括学费减免和生活补贴。")
   const [projectType, setProjectType] = useState("exchange")
   const [projectLevel, setProjectLevel] = useState("national") // 项目级别
   const [duration, setDuration] = useState("long")
@@ -125,7 +125,7 @@ export default function ProjectEditPage() {
   const [cetLevel, setCetLevel] = useState("4")
 
   const handleAIPolish = () => {
-    setProjectIntro(projectIntro + "\n\n【AI优化】参与本项目的学生将有机会深入体验韩国文化，提升国际视野，为未来职业发展奠定坚实基础。")
+    setProjectIntro(projectIntro + "\n\n【AI优化】参与本项目的学生将有机会深入体验A国文化，提升国际视野，为未来职业发展奠定坚实基础。")
   }
 
   return (
@@ -557,7 +557,7 @@ export default function ProjectEditPage() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">类似项目参考</h4>
           <AIRecommendation
-            title="2025韩国延世大学项目"
+            title="2025A国延世大学项目"
             stats={[
               { label: "报名", value: "45人" },
               { label: "通过率", value: "82%" }

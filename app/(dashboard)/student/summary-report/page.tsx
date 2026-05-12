@@ -37,11 +37,11 @@ export default function SummaryReportPage() {
     setIsAIGenerating(true)
     setTimeout(() => {
       const aiContent: Record<string, string> = {
-        background: "本人于2026年9月至2028年6月参加了《中美人才培养计划》1+2+1双学位项目，赴美国特洛伊大学进行为期22个月的学习交流。该项目旨在培养具有国际视野的复合型人才，通过中美两校联合培养的模式，让学生获得两校学位证书。",
+        background: "本人于2026年9月至2028年6月参加了《A国B国人才培养计划》1+2+1双学位项目，赴A国某大学进行为期22个月的学习交流。该项目旨在培养具有国际视野的复合型人才，通过中美两校联合培养的模式，让学生获得两校学位证书。",
         learning: "在留学期间，我修读了计算机科学专业的核心课程，包括高级算法、机器学习、软件工程等。通过全英文的教学环境，我的专业英语能力得到了显著提升。同时，我也积极参与了导师的科研项目，完成了一篇关于深度学习的研究论文。",
         experience: "在特洛伊大学学习期间，我积极参与校园活动，加入了国际学生联合会，并担任中国学生学者联合会的副主席。通过组织文化交流活动，我结识了来自世界各地的朋友，拓宽了国际视野。",
-        achievement: "1. 获得美国特洛伊大学计算机科学学士学位\n2. 发表SCI论文1篇，EI论文1篇\n3. 获得校级优秀国际学生奖学金\n4. 通过AWS云计算认证考试",
-        reflection: "这段留学经历让我深刻体会到了中美教育体系的差异，美国高校更注重实践能力和创新思维的培养。我学会了独立思考和解决问题的能力，也更加珍惜国内的教育资源。",
+        achievement: "1. 获得A国某大学计算机科学学士学位\n2. 发表SCI论文1篇，EI论文1篇\n3. 获得校级优秀国际学生奖学金\n4. 通过AWS云计算认证考试",
+        reflection: "这段留学经历让我深刻体会到了中外教育体系的差异，A国高校更注重实践能力和创新思维的培养。我学会了独立思考和解决问题的能力，也更加珍惜国内的教育资源。",
         suggestion: "建议后续参加该项目的同学提前做好语言准备，积极融入当地文化，充分利用学校的各类资源。同时建议学校能够增加行前培训的内容，帮助学生更好地适应海外生活。"
       }
       setReportContent(prev => ({ ...prev, [field]: aiContent[field] }))
@@ -79,11 +79,11 @@ export default function SummaryReportPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>报告标题 <span className="text-destructive">*</span></Label>
-                <Input placeholder="如：我的美国留学之旅" />
+                <Input placeholder="如：我的A国留学之旅" />
               </div>
               <div className="space-y-2">
                 <Label>项目名称</Label>
-                <Input value="2026年《中美人才培养计划》1+2+1双学位项目" disabled />
+                <Input value="2026年《A国B国人才培养计划》1+2+1双学位项目" disabled />
               </div>
             </div>
           </CardContent>

@@ -104,7 +104,7 @@ export default function ApplicationFormPage() {
           </Link>
           <div className="flex-1">
             <Badge variant="outline" className="mb-2">项目申请</Badge>
-            <h1 className="text-lg font-semibold">2026年《中美人才培养计划》1+2+1双学位项目</h1>
+            <h1 className="text-lg font-semibold">2026年《A国B国人才培养计划》1+2+1双学位项目</h1>
           </div>
         </div>
 

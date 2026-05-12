@@ -21,10 +21,10 @@ import { ArrowLeft, FileText, Calendar, Users, MapPin, Building, Clock, Edit2, A
 
 const projectDetails = {
   id: 1,
-  name: "韩国忠南大学奖学金交换生项目(2026)",
+  name: "A国B大学奖学金交换生项目(2026)",
   type: "交换生项目",
-  school: "韩国忠南大学",
-  country: "韩国",
+  school: "A国B大学",
+  country: "A国",
   target: "本科生、研究生",
   duration: "三个月及以上",
   applicants: 15,
@@ -36,7 +36,7 @@ const projectDetails = {
   status: "开放报名",
   applyMethod: "线上",
   isTop200: true,
-  intro: "韩国忠南大学奖学金交换生项目是我校与韩国忠南大学合作开展的交换生项目。该项目为期一个学期，学生可在韩国忠南大学选修课程，获得的学分可按规定进行转换。项目提供部分奖学金资助，包括学费减免和生活补贴。",
+  intro: "A国B大学奖学金交换生项目是我校与A国B大学合作开展的交换生项目。该项目为期一个学期，学生可在A国B大学选修课程，获得的学分可按规定进行转换。项目提供部分奖学金资助，包括学费减免和生活补贴。",
   requirements: [
     "GPA不低于3.0（4分制）",
     "通过CET-4或CET-6考试",
@@ -395,7 +395,7 @@ export default function ProjectDetailPage() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">类似项目参考</h4>
           <div className="border rounded-lg p-3 space-y-2 border-border">
-            <h4 className="font-medium text-sm">2025韩国成均馆大学项目</h4>
+            <h4 className="font-medium text-sm">2025A国成均馆大学项目</h4>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 报名: <span className="font-medium text-foreground">32人</span>
@@ -406,7 +406,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
           <div className="border rounded-lg p-3 space-y-2 border-border">
-            <h4 className="font-medium text-sm">2025韩国延世大学项目</h4>
+            <h4 className="font-medium text-sm">2025A国延世大学项目</h4>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 报名: <span className="font-medium text-foreground">45人</span>

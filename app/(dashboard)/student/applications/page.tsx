@@ -54,9 +54,9 @@ import Link from "next/link"
 const applications = [
   {
     id: 1,
-    projectName: "2026年《中美人才培养计划》1+2+1双学位项目和YES非学位项目",
+    projectName: "2026年《A国B国人才培养计划》1+2+1双学位项目",
     projectType: "双学位项目",
-    targetSchool: "加州大学伯克利分校",
+    targetSchool: "A国X大学",
     applyTime: "2026-03-15 14:30",
     dispatchTime: "2026-09-01 至 2028-06-30",
     status: "审核中",
@@ -67,9 +67,9 @@ const applications = [
   },
   {
     id: 2,
-    projectName: "(亚洲地区)2026年秋季学期第三批交换生项目",
+    projectName: "2026年秋季学期第三批交换生项目",
     projectType: "交换生项目",
-    targetSchool: "东京大学",
+    targetSchool: "C国Y大学",
     applyTime: "2026-03-10 09:15",
     dispatchTime: "2026-08-25 至 2026-12-24",
     status: "已通过",
@@ -80,9 +80,9 @@ const applications = [
   },
   {
     id: 3,
-    projectName: "韩国忠南大学奖学金交换生项目(2026)",
+    projectName: "A国B大学奖学金交换生项目(2026)",
     projectType: "交换生项目",
-    targetSchool: "韩国忠南大学",
+    targetSchool: "A国B大学",
     applyTime: "2026-02-28 16:45",
     dispatchTime: "2026-09-01 至 2026-12-31",
     status: "已驳回",
@@ -93,9 +93,9 @@ const applications = [
   },
   {
     id: 4,
-    projectName: "布里斯托3+1本硕连读",
+    projectName: "E国F大学3+1本硕连读",
     projectType: "本硕连读",
-    targetSchool: "英国布里斯托大学",
+    targetSchool: "E国F大学",
     applyTime: "2026-03-20 11:20",
     dispatchTime: "2026-09-01 至 2027-06-30",
     status: "草稿",

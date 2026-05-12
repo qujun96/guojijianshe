@@ -49,7 +49,7 @@ import {
 const applications = [
   {
     id: "PA202403001",
-    projectName: "剑桥大学工程学暑期交流项目",
+    projectName: "G国H大学工程学暑期交流项目",
     applyUnit: "电气工程学院",
     applicant: "张伟教授",
     applyTime: "2024-03-15",
@@ -59,7 +59,7 @@ const applications = [
   },
   {
     id: "PA202403002",
-    projectName: "牛津大学人工智能研修班",
+    projectName: "G国I大学人工智能研修班",
     applyUnit: "信息工程学院",
     applicant: "陈明教授",
     applyTime: "2024-03-14",
@@ -69,7 +69,7 @@ const applications = [
   },
   {
     id: "PA202403003",
-    projectName: "哈佛大学经济管理项目",
+    projectName: "A国J大学经济管理项目",
     applyUnit: "管理学院",
     applicant: "刘芳副教授",
     applyTime: "2024-03-13",
@@ -79,7 +79,7 @@ const applications = [
   },
   {
     id: "PA202403004",
-    projectName: "慕尼黑工业大学交换项目",
+    projectName: "K国L大学交换项目",
     applyUnit: "机械工程学院",
     applicant: "王磊教授",
     applyTime: "2024-03-12",
@@ -89,7 +89,7 @@ const applications = [
   },
   {
     id: "PA202403005",
-    projectName: "东京工业大学联合培养",
+    projectName: "C国M大学联合培养",
     applyUnit: "土木工程学院",
     applicant: "李强教授",
     applyTime: "2024-03-11",
@@ -99,7 +99,7 @@ const applications = [
   },
   {
     id: "PA202403006",
-    projectName: "麻省理工联合培养计划",
+    projectName: "A国N大学联合培养计划",
     applyUnit: "机械工程学院",
     applicant: "王芳副教授",
     applyTime: "2024-03-10",

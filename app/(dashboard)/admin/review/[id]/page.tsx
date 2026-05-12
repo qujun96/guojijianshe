@@ -86,7 +86,7 @@ const applicationsData: Record<string, {
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "交换生项目",
     dispatchTime: "2026-08-25 00:00 至 2026-12-24 23:59",
-    targetSchool: "东京大学",
+    targetSchool: "C国Y大学",
     aiScore: 86,
     gpa: 3.85,
     ranking: "5/120",
@@ -95,13 +95,13 @@ const applicationsData: Record<string, {
     toefl: null,
     ielts: 6.5,
     hasOverseasExp: true,
-    overseasExp: "2024年暑假参加日本早稻田大学短期交流项目，为期4周",
+    overseasExp: "2024年暑假参加C国T大学短期交流项目，为期4周",
     awards: [
       "2023年校级优秀学生一等奖学金",
       "2024年全国大学生英语竞赛二等奖",
       "2023年省级创新创业大赛银奖"
     ],
-    studyPlan: "本次交换学习，我计划深入学习日本传媒行业的发展现状，选修媒体研究、跨文化传播等课程。同时，我将积极参与校内社团活动，增进与日本同学的交流，提升跨文化沟通能力。预期通过本次交换，拓宽国际视野，为未来从事国际传媒工作奠定基础。",
+    studyPlan: "本次交换学习，我计划深入学习C国传媒行业的发展现状，选修媒体研究、跨文化传播等课程。同时，我将积极参与校内社团活动，增进与C国同学的交流，提升跨文化沟通能力。预期通过本次交换，拓宽国际视野，为未来从事国际传媒工作奠定基础。",
     materials: [
       { name: "成绩单.pdf", status: "verified" },
       { name: "语言成绩证明.pdf", status: "verified" },
@@ -124,7 +124,7 @@ const applicationsData: Record<string, {
   },
   "2": {
     id: 2,
-    studentName: "东京全",
+    studentName: "王小明",
     studentId: "20220101002",
     department: "美视电影学院",
     major: "影视摄影与制作",
@@ -134,7 +134,7 @@ const applicationsData: Record<string, {
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "国际竞赛",
     dispatchTime: "2026-08-25 00:00 至 2026-12-24 23:59",
-    targetSchool: "韩国中央大学",
+    targetSchool: "A国中央大学",
     aiScore: 75,
     gpa: 3.45,
     ranking: "28/120",
@@ -148,7 +148,7 @@ const applicationsData: Record<string, {
       "2024年校级优秀学生三等奖学金",
       "2023年院级摄影大赛一等奖"
     ],
-    studyPlan: "希望通过本次国际竞赛项目，学习韩国影视制作的先进理念和技术，参与国际影视创作交流，提升专业实践能力。",
+    studyPlan: "希望通过本次国际竞赛项目，学习A国影视制作的先进理念和技术，参与国际影视创作交流，提升专业实践能力。",
     materials: [
       { name: "成绩单.pdf", status: "verified" },
       { name: "语言成绩证明.pdf", status: "pending" },
@@ -172,7 +172,7 @@ const applicationsData: Record<string, {
   },
   "3": {
     id: 3,
-    studentName: "布里斯托",
+    studentName: "F市",
     studentId: "20220101003",
     department: "美视电影学院",
     major: "戏剧影视文学",
@@ -182,7 +182,7 @@ const applicationsData: Record<string, {
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "交换生项目",
     dispatchTime: "2026-08-25 00:00 至 2026-12-24 23:59",
-    targetSchool: "日本早稻田大学",
+    targetSchool: "C国T大学",
     aiScore: 86,
     gpa: 2.95,
     ranking: "65/120",
@@ -191,12 +191,12 @@ const applicationsData: Record<string, {
     toefl: null,
     ielts: 7.0,
     hasOverseasExp: true,
-    overseasExp: "2023年暑假参加英国伦敦艺术大学短期交流项目",
+    overseasExp: "2023年暑假参加G国艺术大学短期交流项目",
     awards: [
       "2023年全国大学生剧本创作大赛三等奖",
       "2024年校级文学创作比赛一等奖"
     ],
-    studyPlan: "计划在早稻田大学学习日本戏剧文化和剧本创作技法，深入了解日本传统能剧与现代戏剧的融合发展。",
+    studyPlan: "计划在C国T大学学习C国戏剧文化和剧本创作技法，深入了解C国传统能剧与现代戏剧的融合发展。",
     materials: [
       { name: "成绩单.pdf", status: "verified" },
       { name: "语言成绩证明.pdf", status: "verified" },
@@ -228,7 +228,7 @@ const applicationsData: Record<string, {
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "短期课程项目",
     dispatchTime: "2026-08-25 00:00 至 2026-12-24 23:59",
-    targetSchool: "日本京都精华大学",
+    targetSchool: "C国精华大学",
     aiScore: 75,
     gpa: 3.65,
     ranking: "12/95",
@@ -241,7 +241,7 @@ const applicationsData: Record<string, {
     awards: [
       "2024年校级动画短片大赛金奖"
     ],
-    studyPlan: "希望学习日本动画制作的精髓，了解宫崎骏等大师的创作理念，提升动画创作能力。",
+    studyPlan: "希望学习C国动画制作的精髓，了解宫崎骏等大师的创作理念，提升动画创作能力。",
     materials: [
       { name: "成绩单.pdf", status: "verified" },
       { name: "语言成绩证明.pdf", status: "pending" },
@@ -274,7 +274,7 @@ const applicationsData: Record<string, {
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "短期课程项目",
     dispatchTime: "2026-08-25 00:00 至 2026-12-24 23:59",
-    targetSchool: "韩国中央大学",
+    targetSchool: "A国中央大学",
     aiScore: 86,
     gpa: 3.78,
     ranking: "8/85",
@@ -283,12 +283,12 @@ const applicationsData: Record<string, {
     toefl: null,
     ielts: 6.5,
     hasOverseasExp: true,
-    overseasExp: "2024年寒假参加韩国首尔艺术大学短期交流",
+    overseasExp: "2024年寒假参加A国首都艺术大学短期交流",
     awards: [
       "2023年省级大学生戏剧节最佳男演员",
       "2024年校级话剧大赛一等奖"
     ],
-    studyPlan: "计划学习韩国影视表演技法，了解韩流文化产业运作模式，为未来职业发展打下基础。",
+    studyPlan: "计划学习A国影视表演技法，了解A国流行文化产业运作模式，为未来职业发展打下基础。",
     materials: [
       { name: "成绩单.pdf", status: "verified" },
       { name: "语言成绩证明.pdf", status: "verified" },

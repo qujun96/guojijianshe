@@ -115,7 +115,7 @@ export default function CreditTransferPage() {
             <div className="flex items-center justify-between mb-6 p-4 bg-muted rounded-lg">
               <div>
                 <div className="text-sm text-muted-foreground">完成项目</div>
-                <div className="font-medium mt-1">剑桥大学2026寒假短期课程项目</div>
+                <div className="font-medium mt-1">G国H大学2026寒假短期课程项目</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-muted-foreground">海外课程</div>

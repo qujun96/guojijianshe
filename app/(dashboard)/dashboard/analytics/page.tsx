@@ -61,12 +61,12 @@ const disciplineData = [
 
 // 国家/地区分布 TOP 6
 const regionData = [
-  { name: "美国", count: 89, percentage: 24 },
-  { name: "英国", count: 76, percentage: 21 },
-  { name: "德国", count: 45, percentage: 12 },
-  { name: "日本", count: 38, percentage: 10 },
-  { name: "韩国", count: 35, percentage: 10 },
-  { name: "澳大利亚", count: 28, percentage: 8 },
+  { name: "A国", count: 89, percentage: 24 },
+  { name: "G国", count: 76, percentage: 21 },
+  { name: "K国", count: 45, percentage: 12 },
+  { name: "C国", count: 38, percentage: 10 },
+  { name: "A国", count: 35, percentage: 10 },
+  { name: "R国", count: 28, percentage: 8 },
 ]
 
 // 停留时长分布

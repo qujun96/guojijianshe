@@ -47,8 +47,8 @@ import { AIAssistantPanel } from "@/components/ai/ai-assistant-panel"
 
 // 待办事项数据 - 按阶段分类
 const todoItems = [
-  { id: "1", type: "review", title: "王家瑞 - (亚洲地区)2026年秋季学期第三批交换生项目", department: "美视电影学院", status: "pending", deadline: "2026-04-05", daysLeft: 3, overdue: false, phase: "pre", handler: "李老师" },
-  { id: "2", type: "review", title: "李明 - 剑桥大学2026寒假项目", department: "计算机学院", status: "pending", deadline: "2026-04-03", daysLeft: -1, overdue: true, phase: "pre", handler: "王老师" },
+  { id: "1", type: "review", title: "王家瑞 - 2026年秋季学期第三批交换生项目", department: "美视电影学院", status: "pending", deadline: "2026-04-05", daysLeft: 3, overdue: false, phase: "pre", handler: "李老师" },
+  { id: "2", type: "review", title: "李明 - G国H大学2026寒假项目", department: "计算机学院", status: "pending", deadline: "2026-04-03", daysLeft: -1, overdue: true, phase: "pre", handler: "王老师" },
   { id: "3", type: "dispatch", title: "张三 - 保留学籍材料审核", department: "新闻传播学院", status: "pending", deadline: "2026-04-06", daysLeft: 4, overdue: false, phase: "during", handler: "张老师" },
   { id: "4", type: "report", title: "赵六 - 3月学习报告待查看", department: "管理学院", status: "pending", deadline: "2026-04-08", daysLeft: 6, overdue: false, phase: "during", handler: "刘老师" },
   { id: "5", type: "grades", title: "王五 - 海外成绩单审核", department: "法学院", status: "pending", deadline: "2026-04-04", daysLeft: -2, overdue: true, phase: "post", handler: "陈老师" },
