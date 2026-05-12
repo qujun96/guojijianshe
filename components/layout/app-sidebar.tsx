@@ -34,6 +34,15 @@ import {
   LogIn,
   ArrowRightLeft,
   Archive,
+  Shield,
+  Users,
+  KeyRound,
+  Network,
+  BookMarked,
+  ScrollText,
+  History,
+  Cog,
+  Bell,
 } from "lucide-react"
 
 interface MenuItemType {
@@ -123,6 +132,21 @@ const menuItems: MenuItemType[] = [
       { label: "学籍恢复审核", href: "/admin/restore-review", icon: <RefreshCcw className="h-4 w-4" /> },
       { label: "成绩与学分审核", href: "/admin/grades-credit-review", icon: <GraduationCap className="h-4 w-4" /> },
       { label: "归档材料管理", href: "/admin/archive-manage", icon: <FolderOpen className="h-4 w-4" /> },
+    ],
+  },
+  // 系统管理
+  {
+    label: "系统管理",
+    icon: <Shield className="h-4 w-4" />,
+    children: [
+      { label: "用户管理", href: "/system/users", icon: <Users className="h-4 w-4" /> },
+      { label: "角色权限管理", href: "/system/roles", icon: <KeyRound className="h-4 w-4" /> },
+      { label: "部门管理", href: "/system/departments", icon: <Network className="h-4 w-4" /> },
+      { label: "数据字典", href: "/system/dictionary", icon: <BookMarked className="h-4 w-4" /> },
+      { label: "登录日志", href: "/system/login-logs", icon: <LogIn className="h-4 w-4" /> },
+      { label: "操作日志", href: "/system/operation-logs", icon: <History className="h-4 w-4" /> },
+      { label: "系统配置", href: "/system/settings", icon: <Cog className="h-4 w-4" /> },
+      { label: "通知公告", href: "/system/notices", icon: <Bell className="h-4 w-4" /> },
     ],
   },
 ]
