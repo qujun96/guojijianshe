@@ -451,7 +451,7 @@ export default function DepartmentsManagementPage() {
                   <SelectValue placeholder="请选择上级部门（不选则为顶级）" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">无（顶级部门）</SelectItem>
+                  <SelectItem value="none">无（顶级部门）</SelectItem>
                   <SelectItem value="1">学校</SelectItem>
                   <SelectItem value="2">├─ 国际合作处</SelectItem>
                   <SelectItem value="3">├─ 教务处</SelectItem>
@@ -540,7 +540,7 @@ export default function DepartmentsManagementPage() {
                   <SelectValue placeholder="请选择上级部门" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">无（顶级部门）</SelectItem>
+                  <SelectItem value="none">无（顶级部门）</SelectItem>
                   <SelectItem value="1">学校</SelectItem>
                   <SelectItem value="2">├─ 国际合作处</SelectItem>
                   <SelectItem value="3">├─ 教务处</SelectItem>
