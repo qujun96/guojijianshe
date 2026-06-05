@@ -27,7 +27,10 @@ import {
   Search,
   X,
   FileCheck,
-  CheckSquare
+  CheckSquare,
+  Plus,
+  Trash2,
+  MapPin
 } from "lucide-react"
 import {
   AIAssistantPanel,
@@ -40,6 +43,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 // ============ 离校手续数据 ============
 interface Task {
@@ -145,6 +165,20 @@ interface Material {
   fileName: string | null
   uploadTime: string | null
   aiVerified: boolean
+  type?: "file" | "itinerary" // file=文件上传, itinerary=行程信息表格
+}
+
+// ============ 行程信息数据 ============
+interface ItineraryItem {
+  id: string
+  date: string
+  country: string
+  city: string
+  transport: string
+  flightNo: string
+  departureTime: string
+  arrivalTime: string
+  details: string
 }
 
 const materialTypes: Material[] = [
@@ -157,6 +191,7 @@ const materialTypes: Material[] = [
     fileName: "保留学籍证明_张三_2026.pdf",
     uploadTime: "2026-03-15 14:30",
     aiVerified: true,
+    type: "file",
   },
   {
     id: "admission",
@@ -167,6 +202,7 @@ const materialTypes: Material[] = [
     fileName: "Admission_Letter_A_University.pdf",
     uploadTime: "2026-03-16 09:20",
     aiVerified: true,
+    type: "file",
   },
   {
     id: "visa",
@@ -177,6 +213,7 @@ const materialTypes: Material[] = [
     fileName: null,
     uploadTime: null,
     aiVerified: false,
+    type: "file",
   },
   {
     id: "insurance",
@@ -187,16 +224,18 @@ const materialTypes: Material[] = [
     fileName: null,
     uploadTime: null,
     aiVerified: false,
+    type: "file",
   },
   {
     id: "itinerary",
-    name: "行程单",
-    description: "往返机票订单或行程安排",
+    name: "行程信息",
+    description: "填写往返行程安排，包括日期、交通方式、航班信息等",
     required: false,
     status: "not_started",
     fileName: null,
     uploadTime: null,
     aiVerified: false,
+    type: "itinerary",
   },
   {
     id: "emergency",
@@ -207,6 +246,7 @@ const materialTypes: Material[] = [
     fileName: "紧急联系人确认书_张三.pdf",
     uploadTime: "2026-03-14 16:45",
     aiVerified: true,
+    type: "file",
   },
 ]
 
@@ -265,6 +305,44 @@ export default function DeparturePreparationPage() {
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [currentUploadTask, setCurrentUploadTask] = useState<Task | null>(null)
+  
+  // 行程信息状态
+  const [showItineraryDialog, setShowItineraryDialog] = useState(false)
+  const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([
+    {
+      id: "1",
+      date: "2026-07-15",
+      country: "中国",
+      city: "北京",
+      transport: "飞机",
+      flightNo: "CA981",
+      departureTime: "08:30",
+      arrivalTime: "12:45",
+      details: "首都机场T3航站楼出发，前往A国X市",
+    },
+    {
+      id: "2",
+      date: "2026-07-15",
+      country: "A国",
+      city: "X市",
+      transport: "大巴",
+      flightNo: "-",
+      departureTime: "14:00",
+      arrivalTime: "15:30",
+      details: "机场大巴前往学校",
+    },
+  ])
+  const [editingItinerary, setEditingItinerary] = useState<ItineraryItem | null>(null)
+  const [newItinerary, setNewItinerary] = useState<Partial<ItineraryItem>>({
+    date: "",
+    country: "",
+    city: "",
+    transport: "",
+    flightNo: "",
+    departureTime: "",
+    arrivalTime: "",
+    details: "",
+  })
 
   // 判断任务是否完成（双方式任务只需完成任意一种）
   const isTaskCompleted = (task: Task) => {
@@ -334,6 +412,37 @@ export default function DeparturePreparationPage() {
     setTasks(prev => prev.map(t => 
       t.id === taskId ? { ...t, uploadedFile: undefined } : t
     ))
+  }
+
+  // 行程信息操作
+  const handleAddItinerary = () => {
+    if (!newItinerary.date || !newItinerary.country || !newItinerary.city) return
+    const newItem: ItineraryItem = {
+      id: Date.now().toString(),
+      date: newItinerary.date || "",
+      country: newItinerary.country || "",
+      city: newItinerary.city || "",
+      transport: newItinerary.transport || "",
+      flightNo: newItinerary.flightNo || "-",
+      departureTime: newItinerary.departureTime || "",
+      arrivalTime: newItinerary.arrivalTime || "",
+      details: newItinerary.details || "",
+    }
+    setItineraryItems(prev => [...prev, newItem])
+    setNewItinerary({
+      date: "",
+      country: "",
+      city: "",
+      transport: "",
+      flightNo: "",
+      departureTime: "",
+      arrivalTime: "",
+      details: "",
+    })
+  }
+
+  const handleDeleteItinerary = (id: string) => {
+    setItineraryItems(prev => prev.filter(item => item.id !== id))
   }
 
   return (
@@ -413,7 +522,7 @@ export default function DeparturePreparationPage() {
           </CardContent>
         </Card>
 
-        {/* Tab切换 - 优化样式 */}
+        {/* Tab切��� - 优化样式 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <div className="bg-muted/50 p-1 rounded-xl">
             <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent gap-1">
@@ -613,7 +722,7 @@ export default function DeparturePreparationPage() {
           {/* 派出材料准备 Tab */}
           <TabsContent value="materials" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {materialTypes.map((material) => (
+              {materialTypes.filter(m => m.type !== "itinerary").map((material) => (
                 <Card 
                   key={material.id} 
                   className={`cursor-pointer transition-all hover:shadow-md ${
@@ -681,6 +790,78 @@ export default function DeparturePreparationPage() {
                 </Card>
               ))}
             </div>
+
+            {/* 行程信息卡片 - 在线填写 */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-base">行程信息</CardTitle>
+                    <Badge variant="outline" className="text-xs">选填</Badge>
+                    {itineraryItems.length > 0 && (
+                      <Badge className="bg-green-100 text-green-700 text-xs">
+                        已填写 {itineraryItems.length} 条
+                      </Badge>
+                    )}
+                  </div>
+                  <Button size="sm" onClick={() => setShowItineraryDialog(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    添加行程
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">填写往返行程安排，包括日期、交通方式、航班信息等</p>
+              </CardHeader>
+              <CardContent>
+                {itineraryItems.length === 0 ? (
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                    <Plane className="h-10 w-10 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mt-3">暂无行程信息</p>
+                    <p className="text-xs text-muted-foreground">点击上方"添加行程"按钮填写行程安排</p>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="w-[100px]">日期</TableHead>
+                          <TableHead className="w-[90px]">国家(地区)</TableHead>
+                          <TableHead className="w-[80px]">城市</TableHead>
+                          <TableHead className="w-[80px]">交通工具</TableHead>
+                          <TableHead className="w-[90px]">航班/班次</TableHead>
+                          <TableHead className="w-[120px]">出发-到达时间</TableHead>
+                          <TableHead>详细内容</TableHead>
+                          <TableHead className="w-[60px]">操作</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {itineraryItems.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-medium">{item.date}</TableCell>
+                            <TableCell>{item.country}</TableCell>
+                            <TableCell>{item.city}</TableCell>
+                            <TableCell>{item.transport}</TableCell>
+                            <TableCell>{item.flightNo}</TableCell>
+                            <TableCell>{item.departureTime} - {item.arrivalTime}</TableCell>
+                            <TableCell className="max-w-[200px] truncate" title={item.details}>{item.details}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                                onClick={() => handleDeleteItinerary(item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* 补充说明 */}
             <Card>
@@ -755,7 +936,7 @@ export default function DeparturePreparationPage() {
               title="截止提醒"
               items={[
                 `材料提交截止日期：${currentStudent.deadline}`,
-                "请确保所有必需材料按时提交",
+                "请确保所���必需材料按时提交",
                 "提交后将进入管理员审核流程"
               ]}
             />
@@ -790,6 +971,110 @@ export default function DeparturePreparationPage() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowUploadDialog(false)}>取消</Button>
               <Button onClick={handleUploadFile}>确认上传</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 添加行程信息弹窗 */}
+      <Dialog open={showItineraryDialog} onOpenChange={setShowItineraryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              添加行程信息
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>日期 <span className="text-destructive">*</span></Label>
+                <Input 
+                  type="date" 
+                  value={newItinerary.date || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, date: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>国家(地区) <span className="text-destructive">*</span></Label>
+                <Input 
+                  placeholder="如：中国、A国" 
+                  value={newItinerary.country || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, country: e.target.value}))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>城市 <span className="text-destructive">*</span></Label>
+                <Input 
+                  placeholder="如：北京、X市" 
+                  value={newItinerary.city || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, city: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>交通工具</Label>
+                <Select 
+                  value={newItinerary.transport || ""}
+                  onValueChange={(v) => setNewItinerary(prev => ({...prev, transport: v}))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="请选择" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="飞机">飞机</SelectItem>
+                    <SelectItem value="火车">火车</SelectItem>
+                    <SelectItem value="大巴">大巴</SelectItem>
+                    <SelectItem value="轮船">轮船</SelectItem>
+                    <SelectItem value="地铁">地铁</SelectItem>
+                    <SelectItem value="出租车">出租车</SelectItem>
+                    <SelectItem value="其他">其他</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>航班/班次</Label>
+                <Input 
+                  placeholder="如：CA981" 
+                  value={newItinerary.flightNo || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, flightNo: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>出发时间</Label>
+                <Input 
+                  type="time" 
+                  value={newItinerary.departureTime || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, departureTime: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>到达时间</Label>
+                <Input 
+                  type="time" 
+                  value={newItinerary.arrivalTime || ""}
+                  onChange={(e) => setNewItinerary(prev => ({...prev, arrivalTime: e.target.value}))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>详细内容</Label>
+              <Textarea 
+                placeholder="填写行程详细说明，如出发地点、到达地点、注意事项等..."
+                rows={3}
+                value={newItinerary.details || ""}
+                onChange={(e) => setNewItinerary(prev => ({...prev, details: e.target.value}))}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowItineraryDialog(false)}>取消</Button>
+              <Button onClick={() => { handleAddItinerary(); setShowItineraryDialog(false); }}>
+                <Plus className="h-4 w-4 mr-1" />
+                添加行程
+              </Button>
             </div>
           </div>
         </DialogContent>
