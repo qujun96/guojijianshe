@@ -95,7 +95,9 @@ export default function ProjectApplicationReviewDetailPage() {
   const searchParams = useSearchParams()
   const isViewMode = searchParams.get("mode") === "view"
   
-  const [reviewOpinion, setReviewOpinion] = useState("")
+  const [reviewOpinion, setReviewOpinion] = useState(`批复及资助意见：
+拟资助______元/生，资助人数上限为______人次。
+实际划拨金额按照实际出团人数及项目效果结算。`)
   const [selectedAction, setSelectedAction] = useState<"approve" | "reject" | "return" | null>(null)
 
   const handleReviewAction = (action: "approve" | "reject" | "return") => {
@@ -499,9 +501,9 @@ export default function ProjectApplicationReviewDetailPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium">审核意见</p>
+                <p className="text-sm font-medium">批复及资助意见</p>
                 <Textarea 
-                  placeholder="请填写审核意见..." 
+                  placeholder="请填写批复及资助意见..." 
                   rows={4}
                   value={reviewOpinion}
                   onChange={(e) => setReviewOpinion(e.target.value)}
