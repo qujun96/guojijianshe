@@ -876,6 +876,24 @@ export default function DeparturePreparationPage() {
                   placeholder="如有需要补充说明的情况，请在此处填写..."
                   className="min-h-[80px]"
                 />
+              </CardContent>
+            </Card>
+
+            {/* 补充附件上传 */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  补充附件上传
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">如有其他需要提交的材料，可在此处上传</p>
+              </CardHeader>
+              <CardContent>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mt-2">点击或拖拽上传补充材料</p>
+                  <p className="text-xs text-muted-foreground">支持 PDF/JPG/PNG/DOC/DOCX，单个文件最大10MB</p>
+                </div>
                 <div className="flex justify-end gap-3 mt-4">
                   <Button variant="outline">保存草稿</Button>
                   <Button disabled={materialsProgress < 100}>提交审核</Button>
