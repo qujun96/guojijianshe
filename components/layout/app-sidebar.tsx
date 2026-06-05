@@ -96,7 +96,7 @@ const menuItems: MenuItemType[] = [
       { label: "参与项目查询", href: "/student/my-projects", icon: <FolderOpen className="h-4 w-4" /> },
       { label: "申请审核", href: "/admin/review", icon: <ClipboardCheck className="h-4 w-4" /> },
       { label: "外派确认", href: "/admin/dispatch-confirm", icon: <UserCheck className="h-4 w-4" /> },
-      { label: "离校任务清单", href: "/student/departure-tasks", icon: <ClipboardList className="h-4 w-4" /> },
+      { label: "派出准备", href: "/student/departure-tasks", icon: <ClipboardList className="h-4 w-4" /> },
       { label: "学籍异动办理", href: "/student/enrollment-change", icon: <UserCog className="h-4 w-4" /> },
       { label: "学籍异动审核", href: "/admin/enrollment-review", icon: <ClipboardCheck className="h-4 w-4" /> },
     ],
@@ -108,7 +108,6 @@ const menuItems: MenuItemType[] = [
     badge: "阶段2",
     badgeColor: "bg-amber-500",
     children: [
-      { label: "派出材料提交", href: "/student/dispatch-materials", icon: <FileText className="h-4 w-4" /> },
       { label: "在外情况填写", href: "/student/overseas-status", icon: <MapPin className="h-4 w-4" /> },
       { label: "学习报告提交", href: "/student/learning-reports", icon: <BookOpen className="h-4 w-4" /> },
       { label: "派出材料审核", href: "/admin/dispatch-review", icon: <ClipboardCheck className="h-4 w-4" /> },

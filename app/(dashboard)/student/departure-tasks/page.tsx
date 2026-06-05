@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   CheckCircle2, 
   Circle, 
@@ -18,10 +20,24 @@ import {
   Sparkles,
   ArrowRight,
   ExternalLink,
-  Info
+  Info,
+  Upload,
+  Plane,
+  FileCheck,
+  Eye,
+  Download,
+  ClipboardList,
+  AlertCircle
 } from "lucide-react"
 import Link from "next/link"
+import {
+  AIAssistantPanel,
+  AIChecklistItem,
+  AISuggestion,
+  AIReminder,
+} from "@/components/ai/ai-assistant-panel"
 
+// ============ 离校手续数据 ============
 interface Task {
   id: string
   name: string
@@ -98,7 +114,83 @@ const tasks: Task[] = [
   },
 ]
 
-function getStatusConfig(status: Task["status"]) {
+// ============ 派出材料数据 ============
+interface Material {
+  id: string
+  name: string
+  description: string
+  required: boolean
+  status: "uploaded" | "pending" | "not_started"
+  fileName: string | null
+  uploadTime: string | null
+  aiVerified: boolean
+}
+
+const materialTypes: Material[] = [
+  {
+    id: "enrollment",
+    name: "保留学籍证明",
+    description: "由学校教务处开具的保留学籍证明文件",
+    required: true,
+    status: "uploaded",
+    fileName: "保留学籍证明_张三_2026.pdf",
+    uploadTime: "2026-03-15 14:30",
+    aiVerified: true,
+  },
+  {
+    id: "admission",
+    name: "境外录取通知书",
+    description: "被境外学校录取或接受交换的正式通知书",
+    required: true,
+    status: "uploaded",
+    fileName: "Admission_Letter_A_University.pdf",
+    uploadTime: "2026-03-16 09:20",
+    aiVerified: true,
+  },
+  {
+    id: "visa",
+    name: "签证材料",
+    description: "有效签证页面复印件或电子签证",
+    required: true,
+    status: "pending",
+    fileName: null,
+    uploadTime: null,
+    aiVerified: false,
+  },
+  {
+    id: "insurance",
+    name: "境外保险证明",
+    description: "涵盖留学期间的医疗及意外保险",
+    required: true,
+    status: "pending",
+    fileName: null,
+    uploadTime: null,
+    aiVerified: false,
+  },
+  {
+    id: "itinerary",
+    name: "行程单",
+    description: "往返机票订单或行程安排",
+    required: false,
+    status: "not_started",
+    fileName: null,
+    uploadTime: null,
+    aiVerified: false,
+  },
+  {
+    id: "emergency",
+    name: "紧急联系人确认书",
+    description: "境外紧急联系人信息确认",
+    required: true,
+    status: "uploaded",
+    fileName: "紧急联系人确认书_张三.pdf",
+    uploadTime: "2026-03-14 16:45",
+    aiVerified: true,
+  },
+]
+
+// ============ 辅助函数 ============
+function getTaskStatusConfig(status: Task["status"]) {
   switch (status) {
     case "completed":
       return { 
@@ -131,47 +223,104 @@ function getStatusConfig(status: Task["status"]) {
   }
 }
 
-export default function DepartureTasksPage() {
-  const completedCount = tasks.filter(t => t.status === "completed").length
-  const progress = (completedCount / tasks.length) * 100
+function getMaterialStatusIcon(status: Material["status"]) {
+  switch (status) {
+    case "uploaded":
+      return <CheckCircle2 className="h-5 w-5 text-green-500" />
+    case "pending":
+      return <Clock className="h-5 w-5 text-amber-500" />
+    case "not_started":
+      return <AlertCircle className="h-5 w-5 text-muted-foreground" />
+  }
+}
+
+function getMaterialStatusText(status: Material["status"]) {
+  switch (status) {
+    case "uploaded":
+      return "已上传"
+    case "pending":
+      return "待上传"
+    case "not_started":
+      return "未开始"
+  }
+}
+
+export default function DeparturePreparationPage() {
+  const [activeTab, setActiveTab] = useState("tasks")
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
+
+  // 离校手续进度计算
+  const completedTasksCount = tasks.filter(t => t.status === "completed").length
+  const tasksProgress = (completedTasksCount / tasks.length) * 100
+
+  // 派出材料进度计算
+  const uploadedMaterialsCount = materialTypes.filter(m => m.status === "uploaded").length
+  const materialsProgress = (uploadedMaterialsCount / materialTypes.length) * 100
+
+  // 总体进度
+  const overallProgress = Math.round((tasksProgress + materialsProgress) / 2)
+
   const currentStudent = {
     name: "张三",
     studentId: "2022010001",
     type: "本科生",
     college: "计算机科学与技术学院",
-    project: "2026年《A国B国人才培养计划》1+2+1双学位项目"
+    project: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    dispatchTime: "2026-07-15 至 2026-08-30",
+    deadline: "2026-06-30"
   }
 
   return (
-    <div className="flex gap-6">
-      <div className="flex-1 space-y-6">
-        {/* 页面标题 */}
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">离校任务清单</h1>
-          <p className="text-muted-foreground mt-1">完成以下任务后方可正式派出</p>
+    <div className="flex gap-4">
+      <div className="flex-1 space-y-4">
+        {/* 页面标题和总体进度 */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">派出准备</h1>
+            <p className="text-muted-foreground mt-1">完成离校手续办理和派出材料准备后方可正式派出</p>
+          </div>
+          <Badge 
+            variant="outline" 
+            className={overallProgress === 100 ? "bg-green-50 text-green-600 border-green-200" : "bg-amber-50 text-amber-600 border-amber-200"}
+          >
+            {overallProgress === 100 ? "准备完成" : "准备中"}
+          </Badge>
         </div>
 
-        {/* 进度概览 */}
+        {/* 总体进度卡片 */}
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-semibold">离校办理进度</h3>
-                <p className="text-sm text-muted-foreground">已完成 {completedCount}/{tasks.length} 项任务</p>
+            <div className="flex items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold">派出准备总进度</h3>
+                  <span className="text-2xl font-bold text-primary">{overallProgress}%</span>
+                </div>
+                <Progress value={overallProgress} className="h-3" />
+                <div className="flex justify-between mt-3 text-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500" />
+                      <span className="text-muted-foreground">离校手续 {Math.round(tasksProgress)}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500" />
+                      <span className="text-muted-foreground">派出材料 {Math.round(materialsProgress)}%</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-primary">{Math.round(progress)}%</span>
+              <div className="w-px h-16 bg-border" />
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">材料截止日期</div>
+                <div className="text-lg font-semibold text-amber-600 mt-1">{currentStudent.deadline}</div>
+                <div className="text-xs text-muted-foreground">距截止还有 87 天</div>
               </div>
-            </div>
-            <Progress value={progress} className="h-2" />
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>开始办理</span>
-              <span>完成离校</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* 学生信息 */}
+        {/* 学生与项目信息 */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -186,9 +335,10 @@ export default function DepartureTasksPage() {
                   </div>
                 </div>
               </div>
-              <Badge variant="outline" className="text-primary border-primary">
-                {currentStudent.type === "本科生" ? "本科生院" : "研究生院"}
-              </Badge>
+              <div className="text-right">
+                <div className="text-sm text-muted-foreground">派出时间</div>
+                <div className="font-medium">{currentStudent.dispatchTime}</div>
+              </div>
             </div>
             <div className="mt-3 p-3 bg-muted/50 rounded-lg">
               <div className="text-sm text-muted-foreground">参与项目</div>
@@ -197,169 +347,331 @@ export default function DepartureTasksPage() {
           </CardContent>
         </Card>
 
-        {/* 任务列表 */}
-        <div className="space-y-3">
-          {tasks.map((task, index) => {
-            const statusConfig = getStatusConfig(task.status)
-            return (
-              <Card 
-                key={task.id} 
-                className={`border-l-4 ${statusConfig.borderColor} transition-all hover:shadow-md`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
-                      <span className="text-sm font-medium">{index + 1}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        {task.icon}
-                        <h4 className="font-medium">{task.name}</h4>
-                        {task.required && (
-                          <Badge variant="destructive" className="text-xs h-5">必办</Badge>
-                        )}
-                        <Badge className={`text-xs h-5 ${statusConfig.color}`}>
-                          {statusConfig.label}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          办理部门: {task.department}
-                        </span>
-                        {task.action && (
-                          task.actionLink ? (
-                            <Link href={task.actionLink}>
-                              <Button size="sm" className="h-7 gap-1">
-                                {task.action}
-                                <ArrowRight className="h-3 w-3" />
-                              </Button>
-                            </Link>
-                          ) : (
-                            <Button size="sm" variant="outline" className="h-7 gap-1">
-                              {task.action}
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          )
-                        )}
-                      </div>
-                      {task.externalSystem && (
-                        <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                          <Info className="h-3 w-3" />
-                          <span>将跳转至: {task.externalSystem}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      {statusConfig.icon}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+        {/* Tab切换 */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 h-12">
+            <TabsTrigger value="tasks" className="flex items-center gap-2 text-sm">
+              <ClipboardList className="h-4 w-4" />
+              离校手续办理
+              <Badge variant="secondary" className="ml-1 h-5 text-xs">
+                {completedTasksCount}/{tasks.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="materials" className="flex items-center gap-2 text-sm">
+              <Plane className="h-4 w-4" />
+              派出材料准备
+              <Badge variant="secondary" className="ml-1 h-5 text-xs">
+                {uploadedMaterialsCount}/{materialTypes.length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* 完成离校按钮 */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">完成离校派出</h4>
-                <p className="text-sm text-muted-foreground">
-                  {progress === 100 
-                    ? "所有任务已完成，可以提交离校确认" 
-                    : "请完成所有必办任务后提交"}
-                </p>
-              </div>
-              <Button disabled={progress < 100} className="gap-2">
-                提交离校确认
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+          {/* 离校手续办理 Tab */}
+          <TabsContent value="tasks" className="space-y-3 mt-4">
+            {tasks.map((task, index) => {
+              const statusConfig = getTaskStatusConfig(task.status)
+              return (
+                <Card 
+                  key={task.id} 
+                  className={`border-l-4 ${statusConfig.borderColor} transition-all hover:shadow-md`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
+                        <span className="text-sm font-medium">{index + 1}</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          {task.icon}
+                          <h4 className="font-medium">{task.name}</h4>
+                          {task.required && (
+                            <Badge variant="destructive" className="text-xs h-5">必办</Badge>
+                          )}
+                          <Badge className={`text-xs h-5 ${statusConfig.color}`}>
+                            {statusConfig.label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            办理部门: {task.department}
+                          </span>
+                          {task.action && (
+                            task.actionLink ? (
+                              <Link href={task.actionLink}>
+                                <Button size="sm" className="h-7 gap-1">
+                                  {task.action}
+                                  <ArrowRight className="h-3 w-3" />
+                                </Button>
+                              </Link>
+                            ) : (
+                              <Button size="sm" variant="outline" className="h-7 gap-1">
+                                {task.action}
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
+                            )
+                          )}
+                        </div>
+                        {task.externalSystem && (
+                          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                            <Info className="h-3 w-3" />
+                            <span>将跳转至: {task.externalSystem}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        {statusConfig.icon}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+
+            {/* 完成离校按钮 */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">确认离校手续</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {tasksProgress === 100 
+                        ? "所有离校手续已完成" 
+                        : "请完成所有必办任务"}
+                    </p>
+                  </div>
+                  <Button disabled={tasksProgress < 100} variant={tasksProgress === 100 ? "default" : "outline"}>
+                    {tasksProgress === 100 ? "已完成" : "待完成"}
+                    {tasksProgress === 100 && <CheckCircle2 className="h-4 w-4 ml-2" />}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 派出材料准备 Tab */}
+          <TabsContent value="materials" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              {materialTypes.map((material) => (
+                <Card 
+                  key={material.id} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    selectedMaterial === material.id ? "ring-2 ring-primary" : ""
+                  }`}
+                  onClick={() => setSelectedMaterial(material.id)}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        {getMaterialStatusIcon(material.status)}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{material.name}</h3>
+                            {material.required && (
+                              <Badge variant="destructive" className="text-xs">必需</Badge>
+                            )}
+                            {material.aiVerified && (
+                              <Badge variant="outline" className="text-xs bg-green-50 text-green-600 border-green-200">
+                                <Sparkles className="h-3 w-3 mr-1" />
+                                AI已验证
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">
+                        {getMaterialStatusText(material.status)}
+                      </Badge>
+                    </div>
+
+                    {material.status === "uploaded" && (
+                      <div className="mt-4 p-3 bg-muted rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-sm">
+                            <FileText className="h-4 w-4 text-primary" />
+                            <span className="font-medium truncate max-w-[180px]">{material.fileName}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="sm" className="h-7 px-2">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 px-2">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-2">
+                          上传时间：{material.uploadTime}
+                        </div>
+                      </div>
+                    )}
+
+                    {material.status !== "uploaded" && (
+                      <div className="mt-4">
+                        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary transition-colors">
+                          <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground mt-2">点击或拖拽上传</p>
+                          <p className="text-xs text-muted-foreground">PDF/JPG/PNG，最大10MB</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+
+            {/* 补充说明 */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  补充说明
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea 
+                  placeholder="如有需要补充说明的情况，请在此处填写..."
+                  className="min-h-[80px]"
+                />
+                <div className="flex justify-end gap-3 mt-4">
+                  <Button variant="outline">保存草稿</Button>
+                  <Button disabled={materialsProgress < 100}>提交审核</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* 右侧AI助手面板 */}
-      <div className="w-72 shrink-0">
-        <Card className="sticky top-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-sm font-medium text-white">AI离校助手</CardTitle>
-                <p className="text-xs text-slate-400">智能引导离校流程</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* 当前步骤提示 */}
-            <div className="p-3 bg-white/10 rounded-lg">
-              <div className="text-xs text-cyan-400 mb-1">当前任务</div>
+      {/* AI助手面板 */}
+      <AIAssistantPanel 
+        title="AI派出助手" 
+        subtitle={activeTab === "tasks" ? "智能引导离校流程" : "协助您完成材料准备"}
+      >
+        {/* 当前进度 */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span>{activeTab === "tasks" ? "离校手续进度" : "材料提交进度"}</span>
+            <span className="font-medium">
+              {activeTab === "tasks" ? Math.round(tasksProgress) : Math.round(materialsProgress)}%
+            </span>
+          </div>
+          <Progress 
+            value={activeTab === "tasks" ? tasksProgress : materialsProgress} 
+            className="h-2" 
+          />
+          <p className="text-xs text-muted-foreground">
+            {activeTab === "tasks" 
+              ? `已完成 ${completedTasksCount}/${tasks.length} 项手续`
+              : `已上传 ${uploadedMaterialsCount}/${materialTypes.length} 项材料`
+            }
+          </p>
+        </div>
+
+        {/* 根据Tab显示不同内容 */}
+        {activeTab === "tasks" ? (
+          <>
+            {/* 当前任务提示 */}
+            <div className="p-3 bg-primary/10 rounded-lg">
+              <div className="text-xs text-primary mb-1">当前任务</div>
               <div className="text-sm font-medium">学籍异动办理</div>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 根据您的学生身份（本科生），请前往本科生院系统办理保留学籍手续
               </p>
             </div>
 
             {/* 智能提醒 */}
             <div className="space-y-2">
-              <div className="text-xs text-slate-400">智能提醒</div>
-              <div className="p-2 bg-amber-500/20 rounded-lg border border-amber-500/30">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
-                  <div className="text-xs text-amber-200">
-                    学籍异动办理需要导师签字，请提前联系导师确认
-                  </div>
-                </div>
-              </div>
-              <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
-                <div className="flex items-start gap-2">
-                  <Info className="h-4 w-4 text-blue-400 mt-0.5 shrink-0" />
-                  <div className="text-xs text-blue-200">
-                    财务结算可能需要2-3个工作日，建议尽早办理
-                  </div>
-                </div>
-              </div>
+              <AISuggestion
+                title="学籍异动提醒"
+                description="学籍异动办理需要导师签字，请提前联系导师确认"
+                type="warning"
+              />
+              <AISuggestion
+                title="财务结算提示"
+                description="财务结算可能需要2-3个工作日，建议尽早办理"
+                type="info"
+              />
             </div>
-
-            {/* 流程时间轴 */}
-            <div className="space-y-2">
-              <div className="text-xs text-slate-400">流程预览</div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-400" />
-                  <span className="text-xs text-slate-300">查看离校清单</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-amber-400" />
-                  <span className="text-xs text-white font-medium">办理学籍异动</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Circle className="h-4 w-4 text-slate-500" />
-                  <span className="text-xs text-slate-400">完成离校任务</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Circle className="h-4 w-4 text-slate-500" />
-                  <span className="text-xs text-slate-400">填写在外情况</span>
-                </div>
+          </>
+        ) : (
+          <>
+            {/* 材料完整性检查 */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <FileCheck className="h-4 w-4" />
+                材料完整性检查
+              </h4>
+              <div className="space-y-2">
+                <AIChecklistItem label="保留学籍证明" status="completed" detail="已验证" />
+                <AIChecklistItem label="境外录取通知书" status="completed" detail="已验证" />
+                <AIChecklistItem label="签证材料" status="pending" detail="待上传" />
+                <AIChecklistItem label="境外保险证明" status="pending" detail="待上传" />
+                <AIChecklistItem label="紧急联系人确认书" status="completed" detail="已验证" />
               </div>
             </div>
 
-            {/* 预计完成时间 */}
-            <div className="p-3 bg-white/5 rounded-lg">
-              <div className="text-xs text-slate-400 mb-1">预计完成时间</div>
-              <div className="text-lg font-semibold text-white">3-5 个工作日</div>
-              <p className="text-xs text-slate-400 mt-1">
-                基于历史数据智能预估
-              </p>
+            <AISuggestion
+              title="签证材料提醒"
+              description="建议尽快申请签证，预计办理时间约2-4周"
+              type="action"
+              onApply={() => {}}
+            />
+          </>
+        )}
+
+        {/* 截止时间提醒 */}
+        <AIReminder
+          title="材料提交截止"
+          deadline="2026-06-30 23:59"
+          description="距离截止还有87天，请尽快完成所有准备工作"
+        />
+
+        {/* 流程预览 */}
+        <div className="space-y-2">
+          <div className="text-xs text-muted-foreground font-medium">流程预览</div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <span className="text-xs">查看派出准备清单</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="flex items-center gap-2">
+              {tasksProgress === 100 
+                ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                : <Clock className="h-4 w-4 text-amber-500" />
+              }
+              <span className={`text-xs ${tasksProgress < 100 ? "font-medium" : ""}`}>
+                完成离校手续办理
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {materialsProgress === 100 
+                ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                : tasksProgress === 100 
+                  ? <Clock className="h-4 w-4 text-amber-500" />
+                  : <Circle className="h-4 w-4 text-muted-foreground" />
+              }
+              <span className={`text-xs ${tasksProgress === 100 && materialsProgress < 100 ? "font-medium" : ""}`}>
+                完成派出材料准备
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Circle className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">等待审核确认派出</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 预计完成时间 */}
+        <div className="p-3 bg-muted/50 rounded-lg">
+          <div className="text-xs text-muted-foreground mb-1">预计完成时间</div>
+          <div className="text-lg font-semibold">3-5 个工作日</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            基于历史数据智能预估
+          </p>
+        </div>
+      </AIAssistantPanel>
     </div>
   )
 }
