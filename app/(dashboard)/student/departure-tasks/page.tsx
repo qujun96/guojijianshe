@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -11,47 +11,56 @@ import {
   CheckCircle2, 
   Circle, 
   Clock, 
-  AlertTriangle,
   FileText,
   UserCog,
   CreditCard,
   Building2,
   BookOpen,
   Sparkles,
-  ArrowRight,
   ExternalLink,
-  Info,
   Upload,
   Plane,
-  FileCheck,
   Eye,
   Download,
   ClipboardList,
-  AlertCircle
+  AlertCircle,
+  Search,
+  X,
+  FileCheck,
+  CheckSquare
 } from "lucide-react"
-import Link from "next/link"
 import {
   AIAssistantPanel,
-  AIChecklistItem,
   AISuggestion,
   AIReminder,
 } from "@/components/ai/ai-assistant-panel"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 // ============ 离校手续数据 ============
 interface Task {
   id: string
   name: string
   description: string
-  status: "completed" | "in_progress" | "pending" | "blocked"
+  status: "completed" | "in_progress" | "pending"
   department: string
   icon: React.ReactNode
-  action?: string
-  actionLink?: string
-  externalSystem?: string
   required: boolean
+  type: "auto" | "upload" | "dual" // auto=自动完成, upload=仅上传, dual=双方式
+  externalSystem?: string
+  externalUrl?: string
+  uploadedFile?: {
+    name: string
+    time: string
+  }
+  queryStatus?: "completed" | "pending" | null // 查询方式的状态
 }
 
-const tasks: Task[] = [
+const initialTasks: Task[] = [
   {
     id: "1",
     name: "项目申请审批",
@@ -60,26 +69,30 @@ const tasks: Task[] = [
     department: "国际处",
     icon: <FileText className="h-5 w-5" />,
     required: true,
+    type: "auto",
   },
   {
     id: "2",
-    name: "导师签字确认",
-    description: "获取校内导师对派出学习的书面同意",
-    status: "completed",
+    name: "辅导员/导师签字确认",
+    description: "上传导师签字同意的派出学习确认书",
+    status: "pending",
     department: "所在学院",
     icon: <BookOpen className="h-5 w-5" />,
     required: true,
+    type: "upload",
   },
   {
     id: "3",
     name: "学籍异动办理",
     description: "办理保留学籍/休学等学籍异动手续",
-    status: "in_progress",
+    status: "pending",
     department: "本科生院/研究生院",
     icon: <UserCog className="h-5 w-5" />,
-    action: "办理学籍异动",
-    actionLink: "/student/enrollment-change",
     required: true,
+    type: "dual",
+    externalSystem: "学籍管理系统",
+    externalUrl: "#",
+    queryStatus: null,
   },
   {
     id: "4",
@@ -88,9 +101,11 @@ const tasks: Task[] = [
     status: "pending",
     department: "财务处",
     icon: <CreditCard className="h-5 w-5" />,
-    action: "前往办理",
-    externalSystem: "财务管理系统",
     required: true,
+    type: "dual",
+    externalSystem: "财务管理系统",
+    externalUrl: "#",
+    queryStatus: null,
   },
   {
     id: "5",
@@ -99,18 +114,24 @@ const tasks: Task[] = [
     status: "pending",
     department: "后勤集团",
     icon: <Building2 className="h-5 w-5" />,
-    action: "前往办理",
-    externalSystem: "宿舍管理系统",
     required: true,
+    type: "dual",
+    externalSystem: "宿舍管理系统",
+    externalUrl: "#",
+    queryStatus: null,
   },
   {
     id: "6",
     name: "图书馆结清",
     description: "确认图书馆借阅书籍已归还、无欠款",
-    status: "completed",
+    status: "pending",
     department: "图书馆",
     icon: <BookOpen className="h-5 w-5" />,
     required: false,
+    type: "dual",
+    externalSystem: "图书馆管理系统",
+    externalUrl: "#",
+    queryStatus: null,
   },
 ]
 
@@ -213,13 +234,6 @@ function getTaskStatusConfig(status: Task["status"]) {
         color: "bg-muted text-muted-foreground",
         borderColor: "border-l-muted-foreground"
       }
-    case "blocked":
-      return { 
-        icon: <AlertTriangle className="h-5 w-5 text-red-500" />, 
-        label: "受阻", 
-        color: "bg-red-100 text-red-700",
-        borderColor: "border-l-red-500"
-      }
   }
 }
 
@@ -247,10 +261,25 @@ function getMaterialStatusText(status: Material["status"]) {
 
 export default function DeparturePreparationPage() {
   const [activeTab, setActiveTab] = useState("tasks")
+  const [tasks, setTasks] = useState(initialTasks)
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [currentUploadTask, setCurrentUploadTask] = useState<Task | null>(null)
+
+  // 判断任务是否完成（双方式任务只需完成任意一种）
+  const isTaskCompleted = (task: Task) => {
+    if (task.status === "completed") return true
+    if (task.type === "dual") {
+      return task.queryStatus === "completed" || task.uploadedFile !== undefined
+    }
+    if (task.type === "upload") {
+      return task.uploadedFile !== undefined
+    }
+    return false
+  }
 
   // 离校手续进度计算
-  const completedTasksCount = tasks.filter(t => t.status === "completed").length
+  const completedTasksCount = tasks.filter(t => isTaskCompleted(t)).length
   const tasksProgress = (completedTasksCount / tasks.length) * 100
 
   // 派出材料进度计算
@@ -268,6 +297,43 @@ export default function DeparturePreparationPage() {
     project: "2026年《A国B国人才培养计划》1+2+1双学位项目",
     dispatchTime: "2026-07-15 至 2026-08-30",
     deadline: "2026-06-30"
+  }
+
+  // 模拟查询外部系统状态
+  const handleQueryStatus = (taskId: string) => {
+    // 模拟查询返回已完成
+    setTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, queryStatus: "completed" as const } : t
+    ))
+  }
+
+  // 打开上传弹窗
+  const handleOpenUpload = (task: Task) => {
+    setCurrentUploadTask(task)
+    setShowUploadDialog(true)
+  }
+
+  // 模拟上传文件
+  const handleUploadFile = () => {
+    if (!currentUploadTask) return
+    setTasks(prev => prev.map(t => 
+      t.id === currentUploadTask.id ? { 
+        ...t, 
+        uploadedFile: { 
+          name: `${t.name}佐证材料_张三.pdf`, 
+          time: new Date().toLocaleString() 
+        } 
+      } : t
+    ))
+    setShowUploadDialog(false)
+    setCurrentUploadTask(null)
+  }
+
+  // 删除上传的文件
+  const handleRemoveFile = (taskId: string) => {
+    setTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, uploadedFile: undefined } : t
+    ))
   }
 
   return (
@@ -347,33 +413,47 @@ export default function DeparturePreparationPage() {
           </CardContent>
         </Card>
 
-        {/* Tab切换 */}
+        {/* Tab切换 - 优化样式 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 h-12">
-            <TabsTrigger value="tasks" className="flex items-center gap-2 text-sm">
-              <ClipboardList className="h-4 w-4" />
-              离校手续办理
-              <Badge variant="secondary" className="ml-1 h-5 text-xs">
-                {completedTasksCount}/{tasks.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="materials" className="flex items-center gap-2 text-sm">
-              <Plane className="h-4 w-4" />
-              派出材料准备
-              <Badge variant="secondary" className="ml-1 h-5 text-xs">
-                {uploadedMaterialsCount}/{materialTypes.length}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+          <div className="bg-muted/50 p-1 rounded-xl">
+            <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent gap-1">
+              <TabsTrigger 
+                value="tasks" 
+                className="flex items-center gap-3 text-sm h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=inactive]:text-muted-foreground transition-all"
+              >
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 data-[state=active]:bg-blue-500">
+                  <ClipboardList className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">离校手续办理</div>
+                  <div className="text-xs text-muted-foreground">{completedTasksCount}/{tasks.length} 已完成</div>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="materials" 
+                className="flex items-center gap-3 text-sm h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=inactive]:text-muted-foreground transition-all"
+              >
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100">
+                  <Plane className="h-4 w-4 text-amber-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">派出材料准备</div>
+                  <div className="text-xs text-muted-foreground">{uploadedMaterialsCount}/{materialTypes.length} 已上传</div>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* 离校手续办理 Tab */}
           <TabsContent value="tasks" className="space-y-3 mt-4">
             {tasks.map((task, index) => {
-              const statusConfig = getTaskStatusConfig(task.status)
+              const statusConfig = getTaskStatusConfig(isTaskCompleted(task) ? "completed" : task.status)
+              const completed = isTaskCompleted(task)
+              
               return (
                 <Card 
                   key={task.id} 
-                  className={`border-l-4 ${statusConfig.borderColor} transition-all hover:shadow-md`}
+                  className={`border-l-4 ${completed ? "border-l-green-500" : statusConfig.borderColor} transition-all hover:shadow-md`}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
@@ -387,40 +467,121 @@ export default function DeparturePreparationPage() {
                           {task.required && (
                             <Badge variant="destructive" className="text-xs h-5">必办</Badge>
                           )}
-                          <Badge className={`text-xs h-5 ${statusConfig.color}`}>
-                            {statusConfig.label}
+                          <Badge className={`text-xs h-5 ${completed ? "bg-green-100 text-green-700" : statusConfig.color}`}>
+                            {completed ? "已完成" : statusConfig.label}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            办理部门: {task.department}
-                          </span>
-                          {task.action && (
-                            task.actionLink ? (
-                              <Link href={task.actionLink}>
-                                <Button size="sm" className="h-7 gap-1">
-                                  {task.action}
-                                  <ArrowRight className="h-3 w-3" />
-                                </Button>
-                              </Link>
-                            ) : (
-                              <Button size="sm" variant="outline" className="h-7 gap-1">
-                                {task.action}
-                                <ExternalLink className="h-3 w-3" />
-                              </Button>
-                            )
-                          )}
+                        <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
+                        <div className="text-xs text-muted-foreground mb-3">
+                          办理部门: {task.department}
                         </div>
-                        {task.externalSystem && (
-                          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                            <Info className="h-3 w-3" />
-                            <span>将跳转至: {task.externalSystem}</span>
+
+                        {/* 根据类型显示不同的操作区域 */}
+                        {task.type === "auto" && (
+                          <div className="flex items-center gap-2 text-sm text-green-600">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <span>系统自动确认完成</span>
+                          </div>
+                        )}
+
+                        {task.type === "upload" && (
+                          <div className="space-y-2">
+                            {task.uploadedFile ? (
+                              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div className="flex items-center gap-2">
+                                  <FileCheck className="h-4 w-4 text-green-600" />
+                                  <span className="text-sm font-medium">{task.uploadedFile.name}</span>
+                                  <span className="text-xs text-muted-foreground">({task.uploadedFile.time})</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button variant="ghost" size="sm" className="h-7 px-2">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-7 px-2 text-red-500 hover:text-red-600" onClick={() => handleRemoveFile(task.id)}>
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <Button variant="outline" size="sm" className="gap-2" onClick={() => handleOpenUpload(task)}>
+                                <Upload className="h-4 w-4" />
+                                上传签字确认书
+                              </Button>
+                            )}
+                          </div>
+                        )}
+
+                        {task.type === "dual" && (
+                          <div className="space-y-3">
+                            <div className="text-xs text-muted-foreground font-medium">完成以下任意一种方式即可：</div>
+                            <div className="grid grid-cols-2 gap-3">
+                              {/* 方式一：查询状态 */}
+                              <div className={`p-3 rounded-lg border ${task.queryStatus === "completed" ? "bg-green-50 border-green-200" : "bg-muted/30 border-dashed"}`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${task.queryStatus === "completed" ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                                    {task.queryStatus === "completed" ? <CheckCircle2 className="h-3 w-3" /> : "1"}
+                                  </div>
+                                  <span className="text-sm font-medium">查询办理状态</span>
+                                </div>
+                                {task.queryStatus === "completed" ? (
+                                  <div className="flex items-center gap-2 text-sm text-green-600">
+                                    <CheckSquare className="h-4 w-4" />
+                                    <span>已确认办理完成</span>
+                                  </div>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="w-full gap-2"
+                                    onClick={() => handleQueryStatus(task.id)}
+                                  >
+                                    <Search className="h-4 w-4" />
+                                    查询{task.externalSystem}
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+
+                              {/* 方式二：上传佐证 */}
+                              <div className={`p-3 rounded-lg border ${task.uploadedFile ? "bg-green-50 border-green-200" : "bg-muted/30 border-dashed"}`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${task.uploadedFile ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                                    {task.uploadedFile ? <CheckCircle2 className="h-3 w-3" /> : "2"}
+                                  </div>
+                                  <span className="text-sm font-medium">上传办理佐证</span>
+                                </div>
+                                {task.uploadedFile ? (
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1 text-sm text-green-600 truncate">
+                                      <FileCheck className="h-4 w-4 flex-shrink-0" />
+                                      <span className="truncate">{task.uploadedFile.name}</span>
+                                    </div>
+                                    <Button variant="ghost" size="sm" className="h-6 px-1 text-red-500 hover:text-red-600" onClick={() => handleRemoveFile(task.id)}>
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="w-full gap-2"
+                                    onClick={() => handleOpenUpload(task)}
+                                  >
+                                    <Upload className="h-4 w-4" />
+                                    上传佐证材料
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
                       <div>
-                        {statusConfig.icon}
+                        {completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          statusConfig.icon
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -559,119 +720,80 @@ export default function DeparturePreparationPage() {
           </div>
           <Progress 
             value={activeTab === "tasks" ? tasksProgress : materialsProgress} 
-            className="h-2" 
+            className="h-2"
           />
-          <p className="text-xs text-muted-foreground">
-            {activeTab === "tasks" 
-              ? `已完成 ${completedTasksCount}/${tasks.length} 项手续`
-              : `已上传 ${uploadedMaterialsCount}/${materialTypes.length} 项材料`
-            }
-          </p>
         </div>
 
-        {/* 根据Tab显示不同内容 */}
         {activeTab === "tasks" ? (
           <>
-            {/* 当前任务提示 */}
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <div className="text-xs text-primary mb-1">当前任务</div>
-              <div className="text-sm font-medium">学籍异动办理</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                根据您的学生身份（本科生），请前往本科生院系统办理保留学籍手续
-              </p>
-            </div>
-
-            {/* 智能提醒 */}
-            <div className="space-y-2">
-              <AISuggestion
-                title="学籍异动提醒"
-                description="学籍异动办理需要导师签字，请提前联系导师确认"
-                type="warning"
-              />
-              <AISuggestion
-                title="财务结算提示"
-                description="财务结算可能需要2-3个工作日，建议尽早办理"
-                type="info"
-              />
-            </div>
+            <AISuggestion title="办理建议">
+              <ul className="text-xs space-y-1 text-muted-foreground">
+                <li>1. 导师签字确认书需要导师手写签名</li>
+                <li>2. 学籍异动可通过系统查询或上传办理凭证完成</li>
+                <li>3. 财务、宿舍等手续建议提前1周办理</li>
+              </ul>
+            </AISuggestion>
+            <AIReminder 
+              title="温馨提示"
+              items={[
+                "每项任务支持两种完成方式，任选其一即可",
+                "上传的佐证材料需清晰可辨认",
+                "如有疑问请联系相关办理部门"
+              ]}
+            />
           </>
         ) : (
           <>
-            {/* 材料完整性检查 */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium flex items-center gap-2">
-                <FileCheck className="h-4 w-4" />
-                材料完整性检查
-              </h4>
-              <div className="space-y-2">
-                <AIChecklistItem label="保留学籍证明" status="completed" detail="已验证" />
-                <AIChecklistItem label="境外录取通知书" status="completed" detail="已验证" />
-                <AIChecklistItem label="签证材料" status="pending" detail="待上传" />
-                <AIChecklistItem label="境外保险证明" status="pending" detail="待上传" />
-                <AIChecklistItem label="紧急联系人确认书" status="completed" detail="已验证" />
-              </div>
-            </div>
-
-            <AISuggestion
-              title="签证材料提醒"
-              description="建议尽快申请签证，预计办理时间约2-4周"
-              type="action"
-              onApply={() => {}}
+            <AISuggestion title="材料要求">
+              <ul className="text-xs space-y-1 text-muted-foreground">
+                <li>1. 所有材料需清晰可辨认</li>
+                <li>2. 签证材料请上传有效期内的签证页</li>
+                <li>3. 保险需覆盖整个派出期间</li>
+              </ul>
+            </AISuggestion>
+            <AIReminder 
+              title="截止提醒"
+              items={[
+                `材料提交截止日期：${currentStudent.deadline}`,
+                "请确保所有必需材料按时提交",
+                "提交后将进入管理员审核流程"
+              ]}
             />
           </>
         )}
+      </AIAssistantPanel>
 
-        {/* 截止时间提醒 */}
-        <AIReminder
-          title="材料提交截止"
-          deadline="2026-06-30 23:59"
-          description="距离截止还有87天，请尽快完成所有准备工作"
-        />
-
-        {/* 流程预览 */}
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground font-medium">流程预览</div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-xs">查看派出准备清单</span>
+      {/* 上传文件弹窗 */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
+              上传{currentUploadTask?.name}材料
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+              <Upload className="h-10 w-10 mx-auto text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mt-3">点击或拖拽文件到此处上传</p>
+              <p className="text-xs text-muted-foreground mt-1">支持 PDF/JPG/PNG 格式，最大 10MB</p>
             </div>
-            <div className="flex items-center gap-2">
-              {tasksProgress === 100 
-                ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                : <Clock className="h-4 w-4 text-amber-500" />
-              }
-              <span className={`text-xs ${tasksProgress < 100 ? "font-medium" : ""}`}>
-                完成离校手续办理
-              </span>
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium">提示：</span>
+                {currentUploadTask?.type === "upload" 
+                  ? "请上传导师签字确认的派出学习确认书扫描件或照片"
+                  : "请上传办理完成的凭证、回执单或相关证明材料"
+                }
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {materialsProgress === 100 
-                ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                : tasksProgress === 100 
-                  ? <Clock className="h-4 w-4 text-amber-500" />
-                  : <Circle className="h-4 w-4 text-muted-foreground" />
-              }
-              <span className={`text-xs ${tasksProgress === 100 && materialsProgress < 100 ? "font-medium" : ""}`}>
-                完成派出材料准备
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Circle className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">等待审核确认派出</span>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>取消</Button>
+              <Button onClick={handleUploadFile}>确认上传</Button>
             </div>
           </div>
-        </div>
-
-        {/* 预计完成时间 */}
-        <div className="p-3 bg-muted/50 rounded-lg">
-          <div className="text-xs text-muted-foreground mb-1">预计完成时间</div>
-          <div className="text-lg font-semibold">3-5 个工作日</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            基于历史数据智能预估
-          </p>
-        </div>
-      </AIAssistantPanel>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

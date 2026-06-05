@@ -141,7 +141,7 @@ export default function DispatchReviewPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ClipboardCheck className="h-5 w-5 text-primary" />
-                <CardTitle className="text-base">派出材料审核列表</CardTitle>
+                <CardTitle className="text-base">派出准备审核列表</CardTitle>
               </div>
               <div className="flex items-center gap-3">
                 <Button variant="outline" size="sm" className="gap-2">
