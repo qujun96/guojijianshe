@@ -992,14 +992,6 @@ function getStudentHistory(record: SafetyRecord) {
                   <div className="flex gap-2 pt-1">
                     <Button
                       size="sm"
-                      className="bg-red-600 hover:bg-red-700 gap-1"
-                      onClick={() => showToast(`正在呼叫 ${selectedRecord.studentName}...`)}
-                    >
-                      <Phone className="h-3.5 w-3.5 mr-1" />
-                      联系学生
-                    </Button>
-                    <Button
-                      size="sm"
                       variant="outline"
                       className="gap-1"
                       onClick={() => {
