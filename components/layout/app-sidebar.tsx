@@ -43,6 +43,8 @@ import {
   History,
   Cog,
   Bell,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react"
 
 interface MenuItemType {
@@ -111,8 +113,10 @@ const menuItems: MenuItemType[] = [
     children: [
       { label: "在外情况填写", href: "/student/overseas-status", icon: <MapPin className="h-4 w-4" /> },
       { label: "学习报告提交", href: "/student/learning-reports", icon: <BookOpen className="h-4 w-4" /> },
+      { label: "安全汇报", href: "/student/safety-report", icon: <ShieldCheck className="h-4 w-4" /> },
       { label: "在外情况查看", href: "/admin/overseas-status", icon: <Globe className="h-4 w-4" /> },
       { label: "学习报告查看", href: "/admin/reports-view", icon: <Eye className="h-4 w-4" /> },
+      { label: "安全汇报查看", href: "/admin/safety-report-view", icon: <ShieldAlert className="h-4 w-4" /> },
     ],
   },
   // 派出后阶段
