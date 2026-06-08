@@ -169,6 +169,7 @@ export default function ProjectPublishPage() {
   const [projectIntro, setProjectIntro] = useState("")
   const [projectType, setProjectType] = useState("")
   const [projectLevel, setProjectLevel] = useState("") // 项目级别
+  const [hasProjectApproval, setHasProjectApproval] = useState("") // 是否立项
   const [duration, setDuration] = useState("short")
   const [applyMethod, setApplyMethod] = useState("online")
   const [isTop200, setIsTop200] = useState<string>("")
@@ -203,7 +204,15 @@ export default function ProjectPublishPage() {
   // 处理项目级别变化
   const handleProjectLevelChange = (value: string) => {
     setProjectLevel(value)
-    if (value === "department") {
+    // 切换级别时重置是否立项及关联信息
+    setHasProjectApproval("")
+    setSelectedApplication(null)
+  }
+
+  // 处理是否立项变化
+  const handleHasApprovalChange = (value: string) => {
+    setHasProjectApproval(value)
+    if (value === "yes") {
       setShowApplicationDialog(true)
     } else {
       setSelectedApplication(null)
@@ -408,22 +417,6 @@ export default function ProjectPublishPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 项目类别
-                      </Label>
-                      <Select value={projectType} onValueChange={setProjectType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="请选择项目类别" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="exchange">交换生项目</SelectItem>
-                          <SelectItem value="shortterm">短期课程项目</SelectItem>
-                          <SelectItem value="competition">国际竞赛</SelectItem>
-                          <SelectItem value="internship">海外实习</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>
                         <span className="text-destructive">*</span> 项目级别
                       </Label>
                       <Select value={projectLevel} onValueChange={handleProjectLevelChange}>
@@ -436,10 +429,27 @@ export default function ProjectPublishPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                    {/* 处部/学院级项目才显示"是否立项" */}
+                    {projectLevel === "department" && (
+                      <div className="space-y-2">
+                        <Label>
+                          <span className="text-destructive">*</span> 是否立项
+                        </Label>
+                        <Select value={hasProjectApproval} onValueChange={handleHasApprovalChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="请选择是否立项" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="yes">是</SelectItem>
+                            <SelectItem value="no">否</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
 
                   {/* 已关联的立项申报信息 */}
-                  {selectedApplication && projectLevel === "department" && (
+                  {selectedApplication && projectLevel === "department" && hasProjectApproval === "yes" && (
                     <Card className="bg-blue-50/50 border-blue-200">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
@@ -481,6 +491,25 @@ export default function ProjectPublishPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
+                        <span className="text-destructive">*</span> 项目类别
+                      </Label>
+                      <Select value={projectType} onValueChange={setProjectType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择项目类别" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="exchange">交换生项目</SelectItem>
+                          <SelectItem value="shortterm">短期课程项目</SelectItem>
+                          <SelectItem value="competition">国际竞赛</SelectItem>
+                          <SelectItem value="internship">海外实习</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>
                         <span className="text-destructive">*</span> 项目时长
                       </Label>
                       <div className="flex gap-2">
@@ -505,7 +534,7 @@ export default function ProjectPublishPage() {
 
                 <section className="space-y-4">
                   <h2 className="font-medium text-sm text-muted-foreground">时间安排</h2>
-                  {selectedApplication && projectLevel === "department" && (
+                  {selectedApplication && projectLevel === "department" && hasProjectApproval === "yes" && (
                     <p className="text-xs text-primary">* 已从关联的立项申报中自动填充时间信息</p>
                   )}
                   
