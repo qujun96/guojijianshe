@@ -27,6 +27,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
   Search,
   RotateCcw,
@@ -43,6 +45,8 @@ import {
   AlertTriangle,
   Sparkles,
   Phone,
+  CheckCircle2,
+  MessageSquare,
 } from "lucide-react"
 
 interface SafetyRecord {
@@ -134,12 +138,45 @@ const statusConfig = {
   overdue: { label: "超期未报", icon: AlertTriangle, className: "text-gray-600 border-gray-200 bg-gray-50" },
 }
 
+const remindChannels = [
+  { id: "sms", label: "短信" },
+  { id: "email", label: "邮件" },
+  { id: "wechat", label: "微信" },
+  { id: "app", label: "App推送" },
+]
+
 export default function SafetyReportViewPage() {
   const [searchName, setSearchName] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedProject, setSelectedProject] = useState("all")
   const [selectedRecord, setSelectedRecord] = useState<SafetyRecord | null>(null)
   const [showDialog, setShowDialog] = useState(false)
+
+  // 催报弹窗
+  const [showRemindDialog, setShowRemindDialog] = useState(false)
+  const [remindTarget, setRemindTarget] = useState<SafetyRecord | null>(null)
+  const [remindBatch, setRemindBatch] = useState(false)
+  const [remindChannelSel, setRemindChannelSel] = useState<string[]>(["sms", "app"])
+  const [remindMessage, setRemindMessage] = useState(
+    "您好，您本周的安全汇报已超过截止时间，请尽快登录系统完成汇报，确保我们能及时掌握您的安全状况。"
+  )
+
+  // 响应弹窗
+  const [showRespondDialog, setShowRespondDialog] = useState(false)
+  const [respondTarget, setRespondTarget] = useState<SafetyRecord | null>(null)
+  const [respondLevel, setRespondLevel] = useState("urgent")
+  const [respondNote, setRespondNote] = useState("")
+
+  // 已处理状态记录
+  const [remindedIds, setRemindedIds] = useState<string[]>([])
+  const [respondedIds, setRespondedIds] = useState<string[]>([])
+
+  // 操作反馈提示
+  const [toast, setToast] = useState<string | null>(null)
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const filteredRecords = safetyRecords.filter((record) => {
     if (
@@ -158,6 +195,62 @@ export default function SafetyReportViewPage() {
   const handleViewRecord = (record: SafetyRecord) => {
     setSelectedRecord(record)
     setShowDialog(true)
+  }
+
+  // 打开催报弹窗（单个）
+  const handleOpenRemind = (record: SafetyRecord) => {
+    setRemindTarget(record)
+    setRemindBatch(false)
+    setShowRemindDialog(true)
+  }
+
+  // 打开一键催报弹窗（批量）
+  const handleOpenBatchRemind = () => {
+    setRemindTarget(null)
+    setRemindBatch(true)
+    setShowRemindDialog(true)
+  }
+
+  // 确认催报
+  const handleConfirmRemind = () => {
+    if (remindBatch) {
+      const ids = safetyRecords.filter((r) => r.status === "overdue").map((r) => r.id)
+      setRemindedIds((prev) => Array.from(new Set([...prev, ...ids])))
+      showToast(`已通过${getChannelLabels()}向 ${ids.length} 名超期学生发送催报通知`)
+    } else if (remindTarget) {
+      setRemindedIds((prev) => Array.from(new Set([...prev, remindTarget.id])))
+      showToast(`已通过${getChannelLabels()}向 ${remindTarget.studentName} 发送催报通知`)
+    }
+    setShowRemindDialog(false)
+  }
+
+  const getChannelLabels = () =>
+    remindChannels
+      .filter((c) => remindChannelSel.includes(c.id))
+      .map((c) => c.label)
+      .join("、") || "系统"
+
+  const toggleChannel = (id: string) => {
+    setRemindChannelSel((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    )
+  }
+
+  // 打开响应弹窗
+  const handleOpenRespond = (record: SafetyRecord) => {
+    setRespondTarget(record)
+    setRespondLevel("urgent")
+    setRespondNote("")
+    setShowRespondDialog(true)
+  }
+
+  // 确认响应
+  const handleConfirmRespond = () => {
+    if (respondTarget) {
+      setRespondedIds((prev) => Array.from(new Set([...prev, respondTarget.id])))
+      showToast(`已响应 ${respondTarget.studentName} 的紧急求助，处理记录已生成`)
+    }
+    setShowRespondDialog(false)
   }
 
   const emergencyCount = safetyRecords.filter((r) => r.status === "emergency").length
@@ -180,7 +273,18 @@ export default function SafetyReportViewPage() {
                     当前有 {emergencyCount} 名学生发起紧急求助，{overdueCount} 名学生超期未汇报，请及时处理。
                   </span>
                 </div>
-                <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                <Button
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={() => {
+                    const emergency = safetyRecords.find((r) => r.status === "emergency")
+                    if (emergency) {
+                      handleOpenRespond(emergency)
+                    } else {
+                      handleOpenBatchRemind()
+                    }
+                  }}
+                >
                   立即处理
                 </Button>
               </div>
@@ -302,7 +406,12 @@ export default function SafetyReportViewPage() {
                 <ShieldCheck className="h-4 w-4" />
                 安全汇报列表
               </CardTitle>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenBatchRemind}
+                disabled={overdueCount === 0}
+              >
                 <Bell className="h-4 w-4 mr-1" />
                 一键催报
               </Button>
@@ -376,16 +485,46 @@ export default function SafetyReportViewPage() {
                             <Eye className="h-3.5 w-3.5 mr-1" />
                             查看
                           </Button>
-                          {(record.status === "overdue" || record.status === "emergency") && (
+                          {record.status === "emergency" && (
                             <>
                               <span className="text-muted-foreground">|</span>
-                              <Button
-                                variant="link"
-                                size="sm"
-                                className="h-auto p-0 text-amber-600"
-                              >
-                                {record.status === "emergency" ? "响应" : "催报"}
-                              </Button>
+                              {respondedIds.includes(record.id) ? (
+                                <span className="text-xs text-green-600 flex items-center gap-0.5">
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  已响应
+                                </span>
+                              ) : (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-red-600"
+                                  onClick={() => handleOpenRespond(record)}
+                                >
+                                  <Siren className="h-3.5 w-3.5 mr-0.5" />
+                                  响应
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          {record.status === "overdue" && (
+                            <>
+                              <span className="text-muted-foreground">|</span>
+                              {remindedIds.includes(record.id) ? (
+                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                  <Bell className="h-3.5 w-3.5" />
+                                  已催报
+                                </span>
+                              ) : (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-amber-600"
+                                  onClick={() => handleOpenRemind(record)}
+                                >
+                                  <Bell className="h-3.5 w-3.5 mr-0.5" />
+                                  催报
+                                </Button>
+                              )}
                             </>
                           )}
                         </div>
@@ -405,7 +544,7 @@ export default function SafetyReportViewPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              AI安全监测助手
+              AI安全监测助���
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm opacity-90">
@@ -546,11 +685,23 @@ export default function SafetyReportViewPage() {
                   </p>
                   <p className="text-xs text-red-600">该学生发起紧急求助，请尽快联系并协助处理。</p>
                   <div className="flex gap-2 pt-1">
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700 gap-1">
+                    <Button
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 gap-1"
+                      onClick={() => showToast(`正在呼叫 ${selectedRecord.studentName}...`)}
+                    >
                       <Phone className="h-3.5 w-3.5 mr-1" />
                       联系学生
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => {
+                        setShowDialog(false)
+                        handleOpenRespond(selectedRecord)
+                      }}
+                    >
                       <Send className="h-3.5 w-3.5 mr-1" />
                       上报处理
                     </Button>
@@ -562,7 +713,13 @@ export default function SafetyReportViewPage() {
                 <Button variant="outline" onClick={() => setShowDialog(false)}>
                   关闭
                 </Button>
-                <Button className="gap-2">
+                <Button
+                  className="gap-2"
+                  onClick={() => {
+                    showToast(`已向 ${selectedRecord.studentName} 发送关怀消息`)
+                    setShowDialog(false)
+                  }}
+                >
                   <Send className="h-4 w-4" />
                   发送关怀消息
                 </Button>
@@ -571,6 +728,167 @@ export default function SafetyReportViewPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 催报弹窗 */}
+      <Dialog open={showRemindDialog} onOpenChange={setShowRemindDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-amber-600" />
+              {remindBatch ? "一键催报" : "发送催报通知"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+              {remindBatch ? (
+                <p className="text-amber-700">
+                  将向当前 <span className="font-semibold">{overdueCount}</span> 名超期未汇报的学生统一发送催报通知。
+                </p>
+              ) : (
+                <p className="text-amber-700">
+                  将向 <span className="font-semibold">{remindTarget?.studentName}</span>（{remindTarget?.studentId}）发送催报通知，上次汇报时间：{remindTarget?.lastReport}。
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">通知渠道</Label>
+              <div className="flex flex-wrap gap-2">
+                {remindChannels.map((channel) => (
+                  <button
+                    key={channel.id}
+                    type="button"
+                    onClick={() => toggleChannel(channel.id)}
+                    className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${
+                      remindChannelSel.includes(channel.id)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-input hover:bg-muted"
+                    }`}
+                  >
+                    {remindChannelSel.includes(channel.id) && (
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1 inline" />
+                    )}
+                    {channel.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">催报内容</Label>
+              <Textarea
+                rows={4}
+                value={remindMessage}
+                onChange={(e) => setRemindMessage(e.target.value)}
+                placeholder="请输入催报通知内容"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowRemindDialog(false)}>
+                取消
+              </Button>
+              <Button
+                className="gap-1"
+                onClick={handleConfirmRemind}
+                disabled={remindChannelSel.length === 0}
+              >
+                <Send className="h-4 w-4" />
+                确认发送
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 响应弹窗 */}
+      <Dialog open={showRespondDialog} onOpenChange={setShowRespondDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Siren className="h-5 w-5 text-red-600" />
+              紧急求助响应
+            </DialogTitle>
+          </DialogHeader>
+          {respondTarget && (
+            <div className="space-y-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg space-y-1">
+                <p className="text-sm font-medium text-red-700">
+                  {respondTarget.studentName} · {respondTarget.location}
+                </p>
+                <p className="text-xs text-red-600">{respondTarget.note}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm">处理级别</Label>
+                <Select value={respondLevel} onValueChange={setRespondLevel}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="urgent">紧急处理（立即介入）</SelectItem>
+                    <SelectItem value="high">高优先级（24小时内）</SelectItem>
+                    <SelectItem value="normal">常规跟进</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm">处理措施记录</Label>
+                <Textarea
+                  rows={4}
+                  value={respondNote}
+                  onChange={(e) => setRespondNote(e.target.value)}
+                  placeholder="请记录已采取或计划采取的处理措施，如已联系学生、协助联系使领馆、通知家长等"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1"
+                  onClick={() => showToast(`正在呼叫 ${respondTarget.studentName}...`)}
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  联系学生
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1"
+                  onClick={() => showToast("已发起家长/紧急联系人通知")}
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  通知紧急联系人
+                </Button>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2 border-t">
+                <Button variant="outline" onClick={() => setShowRespondDialog(false)}>
+                  取消
+                </Button>
+                <Button
+                  className="bg-red-600 hover:bg-red-700 gap-1"
+                  onClick={handleConfirmRespond}
+                  disabled={!respondNote.trim()}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  确认响应并记录
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 操作反馈提示 */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-foreground px-4 py-3 text-sm text-background shadow-lg">
+          <CheckCircle2 className="h-4 w-4 text-green-400" />
+          {toast}
+        </div>
+      )}
     </div>
   )
 }
