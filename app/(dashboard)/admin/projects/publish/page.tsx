@@ -174,6 +174,10 @@ export default function ProjectPublishPage() {
   const [applyMethod, setApplyMethod] = useState("online")
   const [isTop200, setIsTop200] = useState<string>("")
   const [applyTarget, setApplyTarget] = useState("")
+  const [dispatchType, setDispatchType] = useState("abroad") // 项目类型：出国/出境
+  const [continent, setContinent] = useState("") // 所在大洲
+  const [country, setCountry] = useState("") // 国家/地区
+  const [organization, setOrganization] = useState("") // 学校/组织
   const [materialDeadline, setMaterialDeadline] = useState("")
   
   // 时间安排
@@ -660,6 +664,30 @@ export default function ProjectPublishPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      <span className="text-destructive">*</span> 项目类型
+                    </Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={dispatchType === "abroad" ? "default" : "outline"}
+                        onClick={() => setDispatchType("abroad")}
+                        className="flex-1"
+                      >
+                        出国
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={dispatchType === "border" ? "default" : "outline"}
+                        onClick={() => setDispatchType("border")}
+                        className="flex-1"
+                      >
+                        出境
+                      </Button>
+                    </div>
+                  </div>
                 </section>
 
                 <section className="space-y-4">
@@ -667,9 +695,27 @@ export default function ProjectPublishPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
+                        <span className="text-destructive">*</span> 所在大洲
+                      </Label>
+                      <Select value={continent} onValueChange={setContinent}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择所在大洲" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="asia">亚洲</SelectItem>
+                          <SelectItem value="europe">欧洲</SelectItem>
+                          <SelectItem value="north-america">北美洲</SelectItem>
+                          <SelectItem value="south-america">南美洲</SelectItem>
+                          <SelectItem value="oceania">大洋洲</SelectItem>
+                          <SelectItem value="africa">非洲</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>
                         <span className="text-destructive">*</span> 国家/地区
                       </Label>
-                      <Select>
+                      <Select value={country} onValueChange={setCountry}>
                         <SelectTrigger>
                           <SelectValue placeholder="请选择国家/地区" />
                         </SelectTrigger>
@@ -678,7 +724,6 @@ export default function ProjectPublishPage() {
                           <SelectItem value="a-country">A国</SelectItem>
                           <SelectItem value="k-country">K国</SelectItem>
                           <SelectItem value="c-country">C国</SelectItem>
-                          <SelectItem value="kr">A国</SelectItem>
                           <SelectItem value="r-country">R国</SelectItem>
                         </SelectContent>
                       </Select>
@@ -687,7 +732,7 @@ export default function ProjectPublishPage() {
                       <Label>
                         <span className="text-destructive">*</span> 学校/组织
                       </Label>
-                      <Select>
+                      <Select value={organization} onValueChange={setOrganization}>
                         <SelectTrigger>
                           <SelectValue placeholder="请选择学校/组织" />
                         </SelectTrigger>
