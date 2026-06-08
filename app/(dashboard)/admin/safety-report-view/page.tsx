@@ -48,6 +48,9 @@ import {
   CheckCircle2,
   MessageSquare,
   History,
+  Globe,
+  ChevronRight,
+  UserRound,
 } from "lucide-react"
 
 interface SafetyRecord {
@@ -55,14 +58,60 @@ interface SafetyRecord {
   studentName: string
   studentId: string
   college: string
-  project: string
+  projectId: string
   location: string
   status: "safe" | "attention" | "emergency" | "overdue"
   lastReport: string
   week: string
   note: string
   continuousWeeks: number
+  // 境外紧急联系方式
+  overseasPhone: string
+  overseasAddress: string
+  // 紧急联系人
+  emergencyContactName: string
+  emergencyContactRelation: string
+  emergencyContactPhone: string
 }
+
+interface Project {
+  id: string
+  name: string
+  region: string
+  country: string
+  period: string
+}
+
+const projects: Project[] = [
+  {
+    id: "p1",
+    name: "（亚洲地区）2026年秋季学期交换生项目",
+    region: "亚洲",
+    country: "A国 / C国",
+    period: "2026.09 - 2027.01",
+  },
+  {
+    id: "p2",
+    name: "2026年A国B国人才培养计划",
+    region: "亚洲",
+    country: "A国",
+    period: "2026.07 - 2026.12",
+  },
+  {
+    id: "p3",
+    name: "（欧洲地区）2026年春季学期交换生项目",
+    region: "欧洲",
+    country: "F国",
+    period: "2026.02 - 2026.07",
+  },
+  {
+    id: "p4",
+    name: "2026年G国H大学暑期课程项目",
+    region: "欧洲",
+    country: "G国",
+    period: "2026.07 - 2026.08",
+  },
+]
 
 const safetyRecords: SafetyRecord[] = [
   {
@@ -70,65 +119,90 @@ const safetyRecords: SafetyRecord[] = [
     studentName: "王家瑶",
     studentId: "2021001001",
     college: "美视电影学院",
-    project: "（亚洲地区）2026年秋季学期交换生项目",
+    projectId: "p1",
     location: "A国D大学校区",
     status: "safe",
     lastReport: "2026-07-26 09:15",
     week: "第3周",
     note: "本周学习生活一切正常，已适应当地环境。",
     continuousWeeks: 3,
-  },
-  {
-    id: "2",
-    studentName: "李明远",
-    studentId: "2021002015",
-    college: "计算机学院",
-    project: "2026年A国B国人才培养计划",
-    location: "A国某大学",
-    status: "attention",
-    lastReport: "2026-07-25 18:40",
-    week: "第3周",
-    note: "近期感冒发烧，已就医，状态在恢复中，暂不影响课程。",
-    continuousWeeks: 3,
-  },
-  {
-    id: "3",
-    studentName: "张晓梅",
-    studentId: "2021003022",
-    college: "外国语学院",
-    project: "（欧洲地区）2026年春季学期交换生项目",
-    location: "F国某大学",
-    status: "emergency",
-    lastReport: "2026-07-27 02:10",
-    week: "第3周",
-    note: "钱包护照丢失，已报警，急需协助联系使领馆补办证件。",
-    continuousWeeks: 3,
-  },
-  {
-    id: "4",
-    studentName: "陈浩然",
-    studentId: "2021004008",
-    college: "经济管理学院",
-    project: "2026年G国H大学暑期课程项目",
-    location: "G国H大学",
-    status: "overdue",
-    lastReport: "2026-07-18 11:20",
-    week: "第2周",
-    note: "上次汇报正常，本周已超期未汇报。",
-    continuousWeeks: 2,
+    overseasPhone: "+81 90-1234-5678",
+    overseasAddress: "A国D市D大学国际学生宿舍 3栋 502室",
+    emergencyContactName: "王建国",
+    emergencyContactRelation: "父亲",
+    emergencyContactPhone: "+86 138-0000-1111",
   },
   {
     id: "5",
     studentName: "刘思雨",
     studentId: "2021005019",
     college: "艺术学院",
-    project: "（亚洲地区）2026年秋季学期交换生项目",
+    projectId: "p1",
     location: "C国艺术大学",
     status: "safe",
     lastReport: "2026-07-26 20:05",
     week: "第3周",
     note: "一切顺利，参加了学校组织的文化交流活动。",
     continuousWeeks: 3,
+    overseasPhone: "+82 10-9876-5432",
+    overseasAddress: "C国S市艺术大学留学生公寓 A座 1208室",
+    emergencyContactName: "刘海涛",
+    emergencyContactRelation: "父亲",
+    emergencyContactPhone: "+86 139-2222-3333",
+  },
+  {
+    id: "2",
+    studentName: "李明远",
+    studentId: "2021002015",
+    college: "计算机学院",
+    projectId: "p2",
+    location: "A国某大学",
+    status: "attention",
+    lastReport: "2026-07-25 18:40",
+    week: "第3周",
+    note: "近期感冒发烧，已就医，状态在恢复中，暂不影响课程。",
+    continuousWeeks: 3,
+    overseasPhone: "+81 80-5555-6666",
+    overseasAddress: "A国T市某大学校外公寓 2栋 301室",
+    emergencyContactName: "李红梅",
+    emergencyContactRelation: "母亲",
+    emergencyContactPhone: "+86 137-4444-5555",
+  },
+  {
+    id: "3",
+    studentName: "张晓梅",
+    studentId: "2021003022",
+    college: "外国语学院",
+    projectId: "p3",
+    location: "F国某大学",
+    status: "emergency",
+    lastReport: "2026-07-27 02:10",
+    week: "第3周",
+    note: "钱包护照丢失，已报警，急需协助联系使领馆补办证件。",
+    continuousWeeks: 3,
+    overseasPhone: "+33 6-1122-3344",
+    overseasAddress: "F国P市某大学国际处宿舍 B栋 405室",
+    emergencyContactName: "张为民",
+    emergencyContactRelation: "父亲",
+    emergencyContactPhone: "+86 135-6666-7777",
+  },
+  {
+    id: "4",
+    studentName: "陈浩然",
+    studentId: "2021004008",
+    college: "经济管理学院",
+    projectId: "p4",
+    location: "G国H大学",
+    status: "overdue",
+    lastReport: "2026-07-18 11:20",
+    week: "第2周",
+    note: "上次汇报正常，本周已超期未汇报。",
+    continuousWeeks: 2,
+    overseasPhone: "+44 7700-900123",
+    overseasAddress: "G国L市H大学学生公寓 C座 210室",
+    emergencyContactName: "陈立群",
+    emergencyContactRelation: "母亲",
+    emergencyContactPhone: "+86 136-8888-9999",
   },
 ]
 
@@ -139,17 +213,15 @@ const statusConfig = {
   overdue: { label: "超期未报", icon: AlertTriangle, className: "text-gray-600 border-gray-200 bg-gray-50" },
 }
 
-const remindChannels = [
-  { id: "sms", label: "短信" },
-  { id: "email", label: "邮件" },
-  { id: "wechat", label: "微信" },
-  { id: "app", label: "App推送" },
-]
-
 export default function SafetyReportViewPage() {
-  const [searchName, setSearchName] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedProject, setSelectedProject] = useState("all")
+  const [searchProject, setSearchProject] = useState("")
+  const [selectedRegion, setSelectedRegion] = useState("all")
+
+  // 项目详情弹窗
+  const [activeProject, setActiveProject] = useState<Project | null>(null)
+  const [showProjectDialog, setShowProjectDialog] = useState(false)
+
+  // 学生详情弹窗
   const [selectedRecord, setSelectedRecord] = useState<SafetyRecord | null>(null)
   const [showDialog, setShowDialog] = useState(false)
 
@@ -157,7 +229,6 @@ export default function SafetyReportViewPage() {
   const [showRemindDialog, setShowRemindDialog] = useState(false)
   const [remindTarget, setRemindTarget] = useState<SafetyRecord | null>(null)
   const [remindBatch, setRemindBatch] = useState(false)
-  const [remindChannelSel, setRemindChannelSel] = useState<string[]>(["sms", "app"])
   const [remindMessage, setRemindMessage] = useState(
     "您好，您本周的安全汇报已超过截止时间，请尽快登录系统完成汇报，确保我们能及时掌握您的安全状况。"
   )
@@ -194,7 +265,7 @@ export default function SafetyReportViewPage() {
       id: "log-init-2",
       type: "remind",
       target: "赵敏（超期 3 天）",
-      detail: "通过短信、App推送发送催报通知",
+      detail: "通过系统消息发送催报通知",
       operator: "管理员·王老师",
       time: "2025-06-06 09:15",
     },
@@ -217,40 +288,56 @@ export default function SafetyReportViewPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const filteredRecords = safetyRecords.filter((record) => {
-    if (
-      searchName &&
-      !record.studentName.includes(searchName) &&
-      !record.studentId.includes(searchName)
-    ) {
-      return false
+  // 按项目统计
+  const getProjectRecords = (projectId: string) =>
+    safetyRecords.filter((r) => r.projectId === projectId)
+
+  const getProjectStats = (projectId: string) => {
+    const records = getProjectRecords(projectId)
+    return {
+      total: records.length,
+      safe: records.filter((r) => r.status === "safe").length,
+      attention: records.filter((r) => r.status === "attention").length,
+      emergency: records.filter((r) => r.status === "emergency").length,
+      overdue: records.filter((r) => r.status === "overdue").length,
+      reportRate:
+        records.length === 0
+          ? 0
+          : Math.round(
+              (records.filter((r) => r.status !== "overdue").length / records.length) * 100
+            ),
     }
-    if (selectedStatus !== "all" && record.status !== selectedStatus) {
-      return false
-    }
+  }
+
+  const filteredProjects = projects.filter((p) => {
+    if (searchProject && !p.name.includes(searchProject)) return false
+    if (selectedRegion !== "all" && p.region !== selectedRegion) return false
     return true
   })
+
+  const handleOpenProject = (project: Project) => {
+    setActiveProject(project)
+    setShowProjectDialog(true)
+  }
 
   const handleViewRecord = (record: SafetyRecord) => {
     setSelectedRecord(record)
     setShowDialog(true)
   }
 
-  // 打开催报弹窗（单个）
+  // 催报
   const handleOpenRemind = (record: SafetyRecord) => {
     setRemindTarget(record)
     setRemindBatch(false)
     setShowRemindDialog(true)
   }
 
-  // 打开一键催报弹窗（批量）
   const handleOpenBatchRemind = () => {
     setRemindTarget(null)
     setRemindBatch(true)
     setShowRemindDialog(true)
   }
 
-  // 确认催报
   const handleConfirmRemind = () => {
     if (remindBatch) {
       const ids = safetyRecords.filter((r) => r.status === "overdue").map((r) => r.id)
@@ -258,34 +345,22 @@ export default function SafetyReportViewPage() {
       addActionLog({
         type: "remind",
         target: `${ids.length} 名超期学生（批量）`,
-        detail: `通过${getChannelLabels()}发送催报通知`,
+        detail: "通过系统消息发送催报通知",
       })
-      showToast(`已通过${getChannelLabels()}向 ${ids.length} 名超期学生发送催报通知`)
+      showToast(`已通过系统消息向 ${ids.length} 名超期学生发送催报通知`)
     } else if (remindTarget) {
       setRemindedIds((prev) => Array.from(new Set([...prev, remindTarget.id])))
       addActionLog({
         type: "remind",
         target: `${remindTarget.studentName}（${remindTarget.studentId}）`,
-        detail: `通过${getChannelLabels()}发送催报通知`,
+        detail: "通过系统消息发送催报通知",
       })
-      showToast(`已通过${getChannelLabels()}向 ${remindTarget.studentName} 发送催报通知`)
+      showToast(`已通过系统消息向 ${remindTarget.studentName} 发送催报通知`)
     }
     setShowRemindDialog(false)
   }
 
-  const getChannelLabels = () =>
-    remindChannels
-      .filter((c) => remindChannelSel.includes(c.id))
-      .map((c) => c.label)
-      .join("、") || "系统"
-
-  const toggleChannel = (id: string) => {
-    setRemindChannelSel((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    )
-  }
-
-  // 打开响应弹窗
+  // 响应
   const handleOpenRespond = (record: SafetyRecord) => {
     setRespondTarget(record)
     setRespondLevel("urgent")
@@ -293,7 +368,6 @@ export default function SafetyReportViewPage() {
     setShowRespondDialog(true)
   }
 
-  // 确认响应
   const handleConfirmRespond = () => {
     if (respondTarget) {
       setRespondedIds((prev) => Array.from(new Set([...prev, respondTarget.id])))
@@ -317,6 +391,63 @@ export default function SafetyReportViewPage() {
   const attentionCount = safetyRecords.filter((r) => r.status === "attention").length
   const overdueCount = safetyRecords.filter((r) => r.status === "overdue").length
   const safeCount = safetyRecords.filter((r) => r.status === "safe").length
+
+  // 渲染单条学生操作按钮
+  const renderRecordActions = (record: SafetyRecord) => (
+    <div className="flex gap-1">
+      <Button
+        variant="link"
+        size="sm"
+        className="h-auto p-0 text-primary"
+        onClick={() => handleViewRecord(record)}
+      >
+        <Eye className="h-3.5 w-3.5 mr-1" />
+        查看
+      </Button>
+      {record.status === "emergency" && (
+        <>
+          <span className="text-muted-foreground">|</span>
+          {respondedIds.includes(record.id) ? (
+            <span className="text-xs text-green-600 flex items-center gap-0.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              已响应
+            </span>
+          ) : (
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-red-600"
+              onClick={() => handleOpenRespond(record)}
+            >
+              <Siren className="h-3.5 w-3.5 mr-0.5" />
+              响应
+            </Button>
+          )}
+        </>
+      )}
+      {record.status === "overdue" && (
+        <>
+          <span className="text-muted-foreground">|</span>
+          {remindedIds.includes(record.id) ? (
+            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+              <Bell className="h-3.5 w-3.5" />
+              已催报
+            </span>
+          ) : (
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-amber-600"
+              onClick={() => handleOpenRemind(record)}
+            >
+              <Bell className="h-3.5 w-3.5 mr-0.5" />
+              催报
+            </Button>
+          )}
+        </>
+      )}
+    </div>
+  )
 
   return (
     <div className="flex gap-6">
@@ -403,75 +534,13 @@ export default function SafetyReportViewPage() {
         {/* 筛选区域 */}
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              汇报查询
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-4">
-              <Input
-                placeholder="学生姓名/学号"
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-              />
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="安全状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部状态</SelectItem>
-                  <SelectItem value="safe">平安</SelectItem>
-                  <SelectItem value="attention">需关注</SelectItem>
-                  <SelectItem value="emergency">紧急</SelectItem>
-                  <SelectItem value="overdue">超期未报</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={selectedProject} onValueChange={setSelectedProject}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择项目" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部项目</SelectItem>
-                  <SelectItem value="asia">亚洲地区交换生项目</SelectItem>
-                  <SelectItem value="europe">欧洲地区交换生项目</SelectItem>
-                  <SelectItem value="america">A国B国人才培养计划</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex gap-2">
-                <Button className="flex-1">
-                  <Search className="h-4 w-4 mr-1" />
-                  搜索
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchName("")
-                    setSelectedStatus("all")
-                    setSelectedProject("all")
-                  }}
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 汇报列表 */}
-        <Card>
-          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                安全汇报列表
+                <Search className="h-4 w-4" />
+                项目查询
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowLogDialog(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setShowLogDialog(true)}>
                   <History className="h-4 w-4 mr-1" />
                   操作记录
                   {actionLogs.length > 0 && (
@@ -493,124 +562,120 @@ export default function SafetyReportViewPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>学生信息</TableHead>
-                  <TableHead>所在项目</TableHead>
-                  <TableHead>当前位置</TableHead>
-                  <TableHead>安全状态</TableHead>
-                  <TableHead>最近汇报</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRecords.map((record) => {
-                  const config = statusConfig[record.status]
-                  const StatusIcon = config.icon
-                  return (
-                    <TableRow
-                      key={record.id}
-                      className={record.status === "emergency" ? "bg-red-50/50" : ""}
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                              {record.studentName.slice(0, 1)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-sm">{record.studentName}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {record.studentId} · {record.college}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-sm max-w-[180px] truncate">{record.project}</p>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          {record.location}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={config.className}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {config.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          {record.lastReport}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="h-auto p-0 text-primary"
-                            onClick={() => handleViewRecord(record)}
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            查看
-                          </Button>
-                          {record.status === "emergency" && (
-                            <>
-                              <span className="text-muted-foreground">|</span>
-                              {respondedIds.includes(record.id) ? (
-                                <span className="text-xs text-green-600 flex items-center gap-0.5">
-                                  <ShieldCheck className="h-3.5 w-3.5" />
-                                  已响应
-                                </span>
-                              ) : (
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="h-auto p-0 text-red-600"
-                                  onClick={() => handleOpenRespond(record)}
-                                >
-                                  <Siren className="h-3.5 w-3.5 mr-0.5" />
-                                  响应
-                                </Button>
-                              )}
-                            </>
-                          )}
-                          {record.status === "overdue" && (
-                            <>
-                              <span className="text-muted-foreground">|</span>
-                              {remindedIds.includes(record.id) ? (
-                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                                  <Bell className="h-3.5 w-3.5" />
-                                  已催报
-                                </span>
-                              ) : (
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="h-auto p-0 text-amber-600"
-                                  onClick={() => handleOpenRemind(record)}
-                                >
-                                  <Bell className="h-3.5 w-3.5 mr-0.5" />
-                                  催报
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
+            <div className="grid grid-cols-4 gap-4">
+              <Input
+                className="col-span-2"
+                placeholder="项目名称"
+                value={searchProject}
+                onChange={(e) => setSearchProject(e.target.value)}
+              />
+              <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                <SelectTrigger>
+                  <SelectValue placeholder="所在地区" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部地区</SelectItem>
+                  <SelectItem value="亚洲">亚洲</SelectItem>
+                  <SelectItem value="欧洲">欧洲</SelectItem>
+                  <SelectItem value="北美洲">北美洲</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchProject("")
+                  setSelectedRegion("all")
+                }}
+              >
+                <RotateCcw className="h-4 w-4 mr-1" />
+                重置
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* 项目卡片网格 */}
+        <div className="grid grid-cols-2 gap-4">
+          {filteredProjects.map((project) => {
+            const stats = getProjectStats(project.id)
+            const hasAlert = stats.emergency > 0 || stats.overdue > 0
+            return (
+              <Card
+                key={project.id}
+                className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/40 ${
+                  hasAlert ? "border-red-200" : ""
+                }`}
+                onClick={() => handleOpenProject(project)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <CardTitle className="text-base leading-snug text-pretty">
+                        {project.name}
+                      </CardTitle>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Globe className="h-3 w-3" />
+                          {project.region} · {project.country}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {project.period}
+                        </span>
+                      </div>
+                    </div>
+                    {hasAlert && (
+                      <Badge variant="outline" className="shrink-0 text-red-600 border-red-200 bg-red-50">
+                        待处理
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      派出 {stats.total} 人
+                    </span>
+                    <span className="text-muted-foreground">
+                      本周汇报率
+                      <span className={`ml-1 font-semibold ${stats.reportRate >= 80 ? "text-green-600" : "text-amber-600"}`}>
+                        {stats.reportRate}%
+                      </span>
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="rounded-md bg-green-50 p-2 text-center">
+                      <p className="text-base font-semibold text-green-600">{stats.safe}</p>
+                      <p className="text-[11px] text-muted-foreground">平安</p>
+                    </div>
+                    <div className="rounded-md bg-amber-50 p-2 text-center">
+                      <p className="text-base font-semibold text-amber-600">{stats.attention}</p>
+                      <p className="text-[11px] text-muted-foreground">需关注</p>
+                    </div>
+                    <div className="rounded-md bg-red-50 p-2 text-center">
+                      <p className="text-base font-semibold text-red-600">{stats.emergency}</p>
+                      <p className="text-[11px] text-muted-foreground">紧急</p>
+                    </div>
+                    <div className="rounded-md bg-gray-100 p-2 text-center">
+                      <p className="text-base font-semibold text-gray-600">{stats.overdue}</p>
+                      <p className="text-[11px] text-muted-foreground">超期</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end text-sm text-primary">
+                    查看汇报详情
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+          {filteredProjects.length === 0 && (
+            <div className="col-span-2 py-12 text-center text-sm text-muted-foreground">
+              未找到匹配的项目
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 右侧AI面板 */}
@@ -619,7 +684,7 @@ export default function SafetyReportViewPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              AI安全监测助���
+              AI安全监测助手
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm opacity-90">
@@ -645,6 +710,10 @@ export default function SafetyReportViewPage() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">在外学生总数</span>
               <span className="font-semibold">{safetyRecords.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">在外项目数</span>
+              <span className="font-semibold">{projects.length}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">待处理事项</span>
@@ -690,7 +759,97 @@ export default function SafetyReportViewPage() {
         </Card>
       </div>
 
-      {/* 详情对话框 */}
+      {/* 项目详情弹窗：该项目下学生汇报列表 */}
+      <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <Globe className="h-5 w-5 text-primary shrink-0" />
+              <span className="text-pretty">{activeProject?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {activeProject && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {activeProject.region} · {activeProject.country}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  {activeProject.period}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  派出 {getProjectStats(activeProject.id).total} 人
+                </span>
+              </div>
+              <div className="max-h-[55vh] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>学生信息</TableHead>
+                      <TableHead>当前位置</TableHead>
+                      <TableHead>安全状态</TableHead>
+                      <TableHead>最近汇报</TableHead>
+                      <TableHead>操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {getProjectRecords(activeProject.id).map((record) => {
+                      const config = statusConfig[record.status]
+                      const StatusIcon = config.icon
+                      return (
+                        <TableRow
+                          key={record.id}
+                          className={record.status === "emergency" ? "bg-red-50/50" : ""}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                  {record.studentName.slice(0, 1)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-sm">{record.studentName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {record.studentId} · {record.college}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 text-sm">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              {record.location}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={config.className}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {config.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 text-sm">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              {record.lastReport}
+                            </div>
+                          </TableCell>
+                          <TableCell>{renderRecordActions(record)}</TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 学生详情对话框 */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -828,24 +987,10 @@ export default function SafetyReportViewPage() {
 
             <div className="space-y-2">
               <Label className="text-sm">通知渠道</Label>
-              <div className="flex flex-wrap gap-2">
-                {remindChannels.map((channel) => (
-                  <button
-                    key={channel.id}
-                    type="button"
-                    onClick={() => toggleChannel(channel.id)}
-                    className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${
-                      remindChannelSel.includes(channel.id)
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background text-muted-foreground border-input hover:bg-muted"
-                    }`}
-                  >
-                    {remindChannelSel.includes(channel.id) && (
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1 inline" />
-                    )}
-                    {channel.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2 rounded-md border border-input bg-muted/40 px-3 py-2 text-sm">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                <span className="font-medium">系统消息</span>
+                <span className="text-xs text-muted-foreground">（站内 / App 推送）</span>
               </div>
             </div>
 
@@ -863,11 +1008,7 @@ export default function SafetyReportViewPage() {
               <Button variant="outline" onClick={() => setShowRemindDialog(false)}>
                 取消
               </Button>
-              <Button
-                className="gap-1"
-                onClick={handleConfirmRemind}
-                disabled={remindChannelSel.length === 0}
-              >
+              <Button className="gap-1" onClick={handleConfirmRemind}>
                 <Send className="h-4 w-4" />
                 确认发送
               </Button>
@@ -894,6 +1035,71 @@ export default function SafetyReportViewPage() {
                 <p className="text-xs text-red-600">{respondTarget.note}</p>
               </div>
 
+              {/* 学生境外紧急联系方式 */}
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-sm font-medium flex items-center gap-1.5">
+                  <Globe className="h-4 w-4 text-primary" />
+                  学生境外联系方式
+                </p>
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5" />
+                      境外电话
+                    </span>
+                    <span className="font-medium">{respondTarget.overseasPhone}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+                      <MapPin className="h-3.5 w-3.5" />
+                      境外住址
+                    </span>
+                    <span className="font-medium text-right">{respondTarget.overseasAddress}</span>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full gap-1 mt-1"
+                  onClick={() => showToast(`正在呼叫 ${respondTarget.studentName}（${respondTarget.overseasPhone}）...`)}
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  拨打学生境外电话
+                </Button>
+              </div>
+
+              {/* 紧急联系人 */}
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-sm font-medium flex items-center gap-1.5">
+                  <UserRound className="h-4 w-4 text-primary" />
+                  紧急联系人
+                </p>
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">姓名 / 关系</span>
+                    <span className="font-medium">
+                      {respondTarget.emergencyContactName}（{respondTarget.emergencyContactRelation}）
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5" />
+                      联系电话
+                    </span>
+                    <span className="font-medium">{respondTarget.emergencyContactPhone}</span>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full gap-1 mt-1"
+                  onClick={() => showToast(`正在联系紧急联系人 ${respondTarget.emergencyContactName}...`)}
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  联系紧急联系人
+                </Button>
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-sm">处理级别</Label>
                 <Select value={respondLevel} onValueChange={setRespondLevel}>
@@ -911,32 +1117,11 @@ export default function SafetyReportViewPage() {
               <div className="space-y-2">
                 <Label className="text-sm">处理措施记录</Label>
                 <Textarea
-                  rows={4}
+                  rows={3}
                   value={respondNote}
                   onChange={(e) => setRespondNote(e.target.value)}
                   placeholder="请记录已采取或计划采取的处理措施，如已联系学生、协助联系使领馆、通知家长等"
                 />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1"
-                  onClick={() => showToast(`正在呼叫 ${respondTarget.studentName}...`)}
-                >
-                  <Phone className="h-3.5 w-3.5" />
-                  联系学生
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1"
-                  onClick={() => showToast("已发起家长/紧急联系人通知")}
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  通知紧急联系人
-                </Button>
               </div>
 
               <div className="flex justify-end gap-3 pt-2 border-t">
@@ -975,45 +1160,30 @@ export default function SafetyReportViewPage() {
               actionLogs.map((log) => {
                 const isRemind = log.type === "remind"
                 return (
-                  <div
-                    key={log.id}
-                    className="flex gap-3 rounded-lg border p-3"
-                  >
+                  <div key={log.id} className="flex gap-3 rounded-lg border p-3">
                     <div
                       className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                        isRemind
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-red-50 text-red-600"
+                        isRemind ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"
                       }`}
                     >
-                      {isRemind ? (
-                        <Bell className="h-4 w-4" />
-                      ) : (
-                        <Siren className="h-4 w-4" />
-                      )}
+                      {isRemind ? <Bell className="h-4 w-4" /> : <Siren className="h-4 w-4" />}
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <span
                             className={`rounded px-1.5 py-0.5 text-xs ${
-                              isRemind
-                                ? "bg-amber-100 text-amber-700"
-                                : "bg-red-100 text-red-700"
+                              isRemind ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
                             }`}
                           >
                             {isRemind ? "催报" : "紧急响应"}
                           </span>
                           <span className="text-sm font-medium">{log.target}</span>
                         </div>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {log.time}
-                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">{log.time}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">{log.detail}</p>
-                      <p className="text-xs text-muted-foreground">
-                        操作人：{log.operator}
-                      </p>
+                      <p className="text-xs text-muted-foreground">操作人：{log.operator}</p>
                     </div>
                   </div>
                 )
