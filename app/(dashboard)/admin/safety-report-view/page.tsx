@@ -47,6 +47,7 @@ import {
   Phone,
   CheckCircle2,
   MessageSquare,
+  History,
 } from "lucide-react"
 
 interface SafetyRecord {
@@ -171,6 +172,44 @@ export default function SafetyReportViewPage() {
   const [remindedIds, setRemindedIds] = useState<string[]>([])
   const [respondedIds, setRespondedIds] = useState<string[]>([])
 
+  // 操作记录
+  type ActionLog = {
+    id: string
+    type: "remind" | "respond"
+    target: string
+    detail: string
+    operator: string
+    time: string
+  }
+  const [actionLogs, setActionLogs] = useState<ActionLog[]>([
+    {
+      id: "log-init-1",
+      type: "respond",
+      target: "李思琪",
+      detail: "紧急处理（立即介入）· 已联系学生并协助联系当地使领馆",
+      operator: "管理员·王老师",
+      time: "2025-06-07 14:32",
+    },
+    {
+      id: "log-init-2",
+      type: "remind",
+      target: "赵敏（超期 3 天）",
+      detail: "通过短信、App推送发送催报通知",
+      operator: "管理员·王老师",
+      time: "2025-06-06 09:15",
+    },
+  ])
+  const [showLogDialog, setShowLogDialog] = useState(false)
+
+  const addActionLog = (log: Omit<ActionLog, "id" | "operator" | "time">) => {
+    const now = new Date()
+    const time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+    setActionLogs((prev) => [
+      { ...log, id: `log-${Date.now()}`, operator: "管理员·王老师", time },
+      ...prev,
+    ])
+  }
+
   // 操作反馈提示
   const [toast, setToast] = useState<string | null>(null)
   const showToast = (msg: string) => {
@@ -216,9 +255,19 @@ export default function SafetyReportViewPage() {
     if (remindBatch) {
       const ids = safetyRecords.filter((r) => r.status === "overdue").map((r) => r.id)
       setRemindedIds((prev) => Array.from(new Set([...prev, ...ids])))
+      addActionLog({
+        type: "remind",
+        target: `${ids.length} 名超期学生（批量）`,
+        detail: `通过${getChannelLabels()}发送催报通知`,
+      })
       showToast(`已通过${getChannelLabels()}向 ${ids.length} 名超期学生发送催报通知`)
     } else if (remindTarget) {
       setRemindedIds((prev) => Array.from(new Set([...prev, remindTarget.id])))
+      addActionLog({
+        type: "remind",
+        target: `${remindTarget.studentName}（${remindTarget.studentId}）`,
+        detail: `通过${getChannelLabels()}发送催报通知`,
+      })
       showToast(`已通过${getChannelLabels()}向 ${remindTarget.studentName} 发送催报通知`)
     }
     setShowRemindDialog(false)
@@ -248,6 +297,17 @@ export default function SafetyReportViewPage() {
   const handleConfirmRespond = () => {
     if (respondTarget) {
       setRespondedIds((prev) => Array.from(new Set([...prev, respondTarget.id])))
+      const levelLabel =
+        respondLevel === "urgent"
+          ? "紧急处理（立即介入）"
+          : respondLevel === "high"
+            ? "高优先级（24小时内）"
+            : "常规跟进"
+      addActionLog({
+        type: "respond",
+        target: `${respondTarget.studentName}（${respondTarget.location}）`,
+        detail: `${levelLabel}${respondNote ? "· " + respondNote : ""}`,
+      })
       showToast(`已响应 ${respondTarget.studentName} 的紧急求助，处理记录已生成`)
     }
     setShowRespondDialog(false)
@@ -406,15 +466,30 @@ export default function SafetyReportViewPage() {
                 <ShieldCheck className="h-4 w-4" />
                 安全汇报列表
               </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleOpenBatchRemind}
-                disabled={overdueCount === 0}
-              >
-                <Bell className="h-4 w-4 mr-1" />
-                一键催报
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLogDialog(true)}
+                >
+                  <History className="h-4 w-4 mr-1" />
+                  操作记录
+                  {actionLogs.length > 0 && (
+                    <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs text-primary-foreground">
+                      {actionLogs.length}
+                    </span>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenBatchRemind}
+                  disabled={overdueCount === 0}
+                >
+                  <Bell className="h-4 w-4 mr-1" />
+                  一键催报
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -879,6 +954,77 @@ export default function SafetyReportViewPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 操作记录弹窗 */}
+      <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-primary" />
+              操作记录
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            {actionLogs.length === 0 ? (
+              <div className="py-12 text-center text-sm text-muted-foreground">
+                暂无催报 / 响应操作记录
+              </div>
+            ) : (
+              actionLogs.map((log) => {
+                const isRemind = log.type === "remind"
+                return (
+                  <div
+                    key={log.id}
+                    className="flex gap-3 rounded-lg border p-3"
+                  >
+                    <div
+                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                        isRemind
+                          ? "bg-amber-50 text-amber-600"
+                          : "bg-red-50 text-red-600"
+                      }`}
+                    >
+                      {isRemind ? (
+                        <Bell className="h-4 w-4" />
+                      ) : (
+                        <Siren className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-xs ${
+                              isRemind
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {isRemind ? "催报" : "紧急响应"}
+                          </span>
+                          <span className="text-sm font-medium">{log.target}</span>
+                        </div>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {log.time}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{log.detail}</p>
+                      <p className="text-xs text-muted-foreground">
+                        操作人：{log.operator}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+          <div className="flex justify-end border-t pt-3">
+            <Button variant="outline" onClick={() => setShowLogDialog(false)}>
+              关闭
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
