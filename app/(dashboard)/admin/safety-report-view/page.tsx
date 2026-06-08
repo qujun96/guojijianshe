@@ -394,7 +394,7 @@ export default function SafetyReportViewPage() {
 
   // 渲染单条学生操作按钮
   const renderRecordActions = (record: SafetyRecord) => (
-    <div className="flex gap-1">
+    <div className="flex items-center justify-end gap-1 whitespace-nowrap">
       <Button
         variant="link"
         size="sm"
@@ -761,7 +761,7 @@ export default function SafetyReportViewPage() {
 
       {/* 项目详情弹窗：该项目下学生汇报列表 */}
       <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 pr-6">
               <Globe className="h-5 w-5 text-primary shrink-0" />
@@ -784,15 +784,15 @@ export default function SafetyReportViewPage() {
                   派出 {getProjectStats(activeProject.id).total} 人
                 </span>
               </div>
-              <div className="max-h-[55vh] overflow-y-auto">
+              <div className="max-h-[55vh] overflow-auto rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>学生信息</TableHead>
-                      <TableHead>当前位置</TableHead>
-                      <TableHead>安全状态</TableHead>
-                      <TableHead>最近汇报</TableHead>
-                      <TableHead>操作</TableHead>
+                      <TableHead className="min-w-[180px]">学生信息</TableHead>
+                      <TableHead className="min-w-[120px]">当前位置</TableHead>
+                      <TableHead className="min-w-[90px]">安全状态</TableHead>
+                      <TableHead className="min-w-[150px]">最近汇报</TableHead>
+                      <TableHead className="text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -837,7 +837,7 @@ export default function SafetyReportViewPage() {
                               {record.lastReport}
                             </div>
                           </TableCell>
-                          <TableCell>{renderRecordActions(record)}</TableCell>
+                          <TableCell className="text-right">{renderRecordActions(record)}</TableCell>
                         </TableRow>
                       )
                     })}
@@ -851,7 +851,7 @@ export default function SafetyReportViewPage() {
 
       {/* 学生详情对话框 */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <Avatar>
@@ -1144,7 +1144,7 @@ export default function SafetyReportViewPage() {
 
       {/* 操作记录弹窗 */}
       <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5 text-primary" />
