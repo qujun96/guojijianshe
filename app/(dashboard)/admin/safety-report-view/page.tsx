@@ -1010,16 +1010,6 @@ function getStudentHistory(record: SafetyRecord) {
                 <Button variant="outline" onClick={() => setShowDialog(false)}>
                   关闭
                 </Button>
-                <Button
-                  className="gap-2"
-                  onClick={() => {
-                    showToast(`已向 ${selectedRecord.studentName} 发送关怀消息`)
-                    setShowDialog(false)
-                  }}
-                >
-                  <Send className="h-4 w-4" />
-                  发送关怀消息
-                </Button>
               </div>
             </div>
           )}
