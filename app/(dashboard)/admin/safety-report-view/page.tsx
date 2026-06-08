@@ -211,9 +211,47 @@ const statusConfig = {
   attention: { label: "需关注", icon: ShieldAlert, className: "text-amber-600 border-amber-200 bg-amber-50" },
   emergency: { label: "紧急", icon: Siren, className: "text-red-600 border-red-200 bg-red-50" },
   overdue: { label: "超期未报", icon: AlertTriangle, className: "text-gray-600 border-gray-200 bg-gray-50" },
+  }
+
+// 生成学生历史汇报记录（按时间倒序）
+function getStudentHistory(record: SafetyRecord) {
+  return [
+    {
+      id: `${record.id}-h1`,
+      week: record.week,
+      date: record.lastReport,
+      status: record.status,
+      location: record.location,
+      note: record.note,
+    },
+    {
+      id: `${record.id}-h2`,
+      week: "上周",
+      date: "2026-07-19 10:30",
+      status: "safe" as const,
+      location: record.location,
+      note: "课程顺利进行，生活作息正常，已逐步适应当地环境。",
+    },
+    {
+      id: `${record.id}-h3`,
+      week: "前一周",
+      date: "2026-07-12 14:20",
+      status: "attention" as const,
+      location: record.location,
+      note: "初到当地有些不适应，时差和饮食在调整中，已联系带队老师协助。",
+    },
+    {
+      id: `${record.id}-h4`,
+      week: "首周",
+      date: "2026-07-05 09:00",
+      status: "safe" as const,
+      location: record.location,
+      note: "已顺利抵达并完成入学注册，住宿安排妥当。",
+    },
+  ]
 }
 
-export default function SafetyReportViewPage() {
+  export default function SafetyReportViewPage() {
   const [searchProject, setSearchProject] = useState("")
   const [selectedRegion, setSelectedRegion] = useState("all")
 
@@ -236,7 +274,6 @@ export default function SafetyReportViewPage() {
   // 响应弹窗
   const [showRespondDialog, setShowRespondDialog] = useState(false)
   const [respondTarget, setRespondTarget] = useState<SafetyRecord | null>(null)
-  const [respondLevel, setRespondLevel] = useState("urgent")
   const [respondNote, setRespondNote] = useState("")
 
   // 已处理状态记录
@@ -362,25 +399,18 @@ export default function SafetyReportViewPage() {
 
   // 响应
   const handleOpenRespond = (record: SafetyRecord) => {
-    setRespondTarget(record)
-    setRespondLevel("urgent")
-    setRespondNote("")
-    setShowRespondDialog(true)
+  setRespondTarget(record)
+  setRespondNote("")
+  setShowRespondDialog(true)
   }
 
   const handleConfirmRespond = () => {
     if (respondTarget) {
       setRespondedIds((prev) => Array.from(new Set([...prev, respondTarget.id])))
-      const levelLabel =
-        respondLevel === "urgent"
-          ? "紧急处理（立即介入）"
-          : respondLevel === "high"
-            ? "高优先级（24小时内）"
-            : "常规跟进"
       addActionLog({
         type: "respond",
         target: `${respondTarget.studentName}（${respondTarget.location}）`,
-        detail: `${levelLabel}${respondNote ? "· " + respondNote : ""}`,
+        detail: respondNote || "已响应紧急求助",
       })
       showToast(`已响应 ${respondTarget.studentName} 的紧急求助，处理记录已生成`)
     }
@@ -911,6 +941,47 @@ export default function SafetyReportViewPage() {
                 <p className="text-sm p-3 bg-muted rounded-lg">{selectedRecord.note}</p>
               </div>
 
+              {/* 历史汇报记录（按时间倒序，可追溯） */}
+              <div>
+                <p className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <History className="h-4 w-4 text-primary" />
+                  历史汇报记录
+                  <span className="text-xs font-normal text-muted-foreground">
+                    所有汇报均可追溯，按时间倒序排列
+                  </span>
+                </p>
+                <div className="relative max-h-[280px] overflow-y-auto pr-1 space-y-5 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-px before:bg-border">
+                  {getStudentHistory(selectedRecord).map((item) => {
+                    const config = statusConfig[item.status]
+                    const Icon = config.icon
+                    return (
+                      <div key={item.id} className="relative flex gap-4">
+                        <div className="relative z-10 w-8 h-8 rounded-full bg-card border-2 border-border flex items-center justify-center shrink-0">
+                          <Icon className={`h-4 w-4 ${config.className.split(" ")[0]}`} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-sm">{item.week}安全汇报</span>
+                            <Badge variant="outline" className={config.className}>
+                              {config.label}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {item.date}
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {item.location}
+                          </div>
+                          <p className="text-sm mt-2 p-3 bg-muted rounded-lg">{item.note}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
               {selectedRecord.status === "emergency" && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-2">
                   <p className="text-sm font-medium text-red-700 flex items-center gap-2">
@@ -1057,15 +1128,6 @@ export default function SafetyReportViewPage() {
                     <span className="font-medium text-right">{respondTarget.overseasAddress}</span>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full gap-1 mt-1"
-                  onClick={() => showToast(`正在呼叫 ${respondTarget.studentName}（${respondTarget.overseasPhone}）...`)}
-                >
-                  <Phone className="h-3.5 w-3.5" />
-                  拨打学生境外电话
-                </Button>
               </div>
 
               {/* 紧急联系人 */}
@@ -1089,29 +1151,6 @@ export default function SafetyReportViewPage() {
                     <span className="font-medium">{respondTarget.emergencyContactPhone}</span>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full gap-1 mt-1"
-                  onClick={() => showToast(`正在联系紧急联系人 ${respondTarget.emergencyContactName}...`)}
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  联系紧急联系人
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">处理级别</Label>
-                <Select value={respondLevel} onValueChange={setRespondLevel}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="urgent">紧急处理（立即介入）</SelectItem>
-                    <SelectItem value="high">高优先级（24小时内）</SelectItem>
-                    <SelectItem value="normal">常规跟进</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
