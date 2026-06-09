@@ -798,10 +798,10 @@ export default function NewProjectApplicationPage() {
           <div className="h-px bg-primary mb-6" />
 
           <div className="space-y-6">
-            {/* 基础预算 */}
+            {/* 经费预算 */}
             <div className="flex items-center gap-2 text-primary mb-4">
               <div className="w-1 h-4 bg-primary rounded" />
-              <span className="text-sm font-medium">基础预算</span>
+              <span className="text-sm font-medium">经费预算</span>
             </div>
 
             <div className="flex items-center gap-4">

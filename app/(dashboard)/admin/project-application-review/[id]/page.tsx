@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -95,9 +96,9 @@ export default function ProjectApplicationReviewDetailPage() {
   const searchParams = useSearchParams()
   const isViewMode = searchParams.get("mode") === "view"
   
-  const [reviewOpinion, setReviewOpinion] = useState(`批复及资助意见：
-拟资助______元/生，资助人数上限为______人次。
-实际划拨金额按照实际出团人数及项目效果结算。`)
+  const [fundPerStudent, setFundPerStudent] = useState("")
+  const [maxStudentCount, setMaxStudentCount] = useState("")
+  const [reviewRemark, setReviewRemark] = useState("")
   const [selectedAction, setSelectedAction] = useState<"approve" | "reject" | "return" | null>(null)
 
   const handleReviewAction = (action: "approve" | "reject" | "return") => {
@@ -330,7 +331,7 @@ export default function ProjectApplicationReviewDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <p className="text-sm font-medium text-primary mb-2">1. 基础预算</p>
+                <p className="text-sm font-medium text-primary mb-2">1. 经费预算</p>
                 <Card className="bg-muted/30">
                   <CardContent className="pt-4">
                     <div className="grid grid-cols-3 gap-6">
@@ -500,14 +501,59 @@ export default function ProjectApplicationReviewDetailPage() {
                 </Button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <p className="text-sm font-medium">批复及资助意见</p>
-                <Textarea 
-                  placeholder="请填写批复及资助意见..." 
-                  rows={4}
-                  value={reviewOpinion}
-                  onChange={(e) => setReviewOpinion(e.target.value)}
-                />
+                <Card className="bg-muted/30">
+                  <CardContent className="pt-5 space-y-5">
+                    {/* 拟资助标准 */}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-3 text-sm">
+                      <span className="text-foreground">拟资助</span>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={fundPerStudent}
+                        onChange={(e) => setFundPerStudent(e.target.value)}
+                        className="w-32 bg-background text-center"
+                      />
+                      <span className="text-foreground">元/生，资助人数上限为</span>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={maxStudentCount}
+                        onChange={(e) => setMaxStudentCount(e.target.value)}
+                        className="w-28 bg-background text-center"
+                      />
+                      <span className="text-foreground">人次。</span>
+                    </div>
+
+                    {/* 资助总额上限预览 */}
+                    {fundPerStudent && maxStudentCount && (
+                      <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm">
+                        <span className="text-muted-foreground">资助总额上限：</span>
+                        <span className="font-semibold text-primary">
+                          ¥{(Number(fundPerStudent) * Number(maxStudentCount)).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* 固定说明 */}
+                    <p className="text-sm text-muted-foreground">
+                      实际划拨金额按照实际出团人数及项目效果结算。
+                    </p>
+
+                    {/* 补充意见 */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">补充说明（选填）</p>
+                      <Textarea
+                        placeholder="请填写其他批复意见或补充说明..."
+                        rows={3}
+                        value={reviewRemark}
+                        onChange={(e) => setReviewRemark(e.target.value)}
+                        className="bg-background"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </CardContent>

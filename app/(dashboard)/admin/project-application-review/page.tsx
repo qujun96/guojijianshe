@@ -43,6 +43,7 @@ const applications = [
     id: "PA202403001",
     projectName: "G国H大学工程学暑期交流项目",
     applyUnit: "电气工程学院",
+    isJoint: false,
     applicant: "张伟教授",
     applyTime: "2024-03-15",
     budget: 150000,
@@ -52,6 +53,7 @@ const applications = [
     id: "PA202403002",
     projectName: "G国I大学人工智能研修班",
     applyUnit: "信息工程学院",
+    isJoint: false,
     applicant: "陈明教授",
     applyTime: "2024-03-14",
     budget: 180000,
@@ -61,6 +63,7 @@ const applications = [
     id: "PA202403003",
     projectName: "A国J大学经济管理项目",
     applyUnit: "管理学院",
+    isJoint: true,
     applicant: "刘芳副教授",
     applyTime: "2024-03-13",
     budget: 200000,
@@ -70,6 +73,7 @@ const applications = [
     id: "PA202403004",
     projectName: "K国L大学交换项目",
     applyUnit: "机械工程学院",
+    isJoint: false,
     applicant: "王磊教授",
     applyTime: "2024-03-12",
     budget: 160000,
@@ -79,6 +83,7 @@ const applications = [
     id: "PA202403005",
     projectName: "C国M大学联合培养",
     applyUnit: "土木工程学院",
+    isJoint: true,
     applicant: "李强教授",
     applyTime: "2024-03-11",
     budget: 220000,
@@ -88,6 +93,7 @@ const applications = [
     id: "PA202403006",
     projectName: "A国N大学联合培养计划",
     applyUnit: "机械工程学院",
+    isJoint: true,
     applicant: "王芳副教授",
     applyTime: "2024-03-10",
     budget: 200000,
@@ -97,6 +103,7 @@ const applications = [
     id: "PA202403007",
     projectName: "A国O大学创新创业项目",
     applyUnit: "经济学院",
+    isJoint: false,
     applicant: "赵强教授",
     applyTime: "2024-03-09",
     budget: 180000,
@@ -106,6 +113,7 @@ const applications = [
     id: "PA202403008",
     projectName: "P国Q大学交流项目",
     applyUnit: "计算机学院",
+    isJoint: false,
     applicant: "周明副教授",
     applyTime: "2024-03-08",
     budget: 150000,
@@ -115,6 +123,7 @@ const applications = [
     id: "PA202403009",
     projectName: "R国S大学研修班",
     applyUnit: "外国语学院",
+    isJoint: false,
     applicant: "孙丽教授",
     applyTime: "2024-03-07",
     budget: 140000,
@@ -124,6 +133,7 @@ const applications = [
     id: "PA202403010",
     projectName: "C国T大学短期项目",
     applyUnit: "法学院",
+    isJoint: false,
     applicant: "钱伟教授",
     applyTime: "2024-03-06",
     budget: 120000,
@@ -133,6 +143,7 @@ const applications = [
     id: "PA202403011",
     projectName: "K国U大学实习项目",
     applyUnit: "建筑学院",
+    isJoint: false,
     applicant: "吴敏副教授",
     applyTime: "2024-03-05",
     budget: 160000,
@@ -142,6 +153,7 @@ const applications = [
     id: "PA202403012",
     projectName: "V国W大学联合培养项目",
     applyUnit: "医学院",
+    isJoint: true,
     applicant: "郑华教授",
     applyTime: "2024-03-04",
     budget: 250000,
@@ -379,9 +391,10 @@ export default function ProjectApplicationReviewPage() {
                 <TableRow>
                   <TableHead>项目名称</TableHead>
                   <TableHead>申报单位</TableHead>
+                  <TableHead>联合申报</TableHead>
                   <TableHead>申报人</TableHead>
                   <TableHead>申报时间</TableHead>
-                  <TableHead>预算金额</TableHead>
+                  <TableHead>经费预算</TableHead>
                   <TableHead>审核状态</TableHead>
                   <TableHead>操作</TableHead>
                 </TableRow>
@@ -398,6 +411,18 @@ export default function ProjectApplicationReviewPage() {
                       </button>
                     </TableCell>
                     <TableCell className="text-sm">{app.applyUnit}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          app.isJoint
+                            ? "bg-blue-50 text-blue-600 border-blue-200"
+                            : "bg-muted text-muted-foreground border-transparent"
+                        }
+                      >
+                        {app.isJoint ? "是" : "否"}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-sm">{app.applicant}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{app.applyTime}</TableCell>
                     <TableCell className="text-sm font-medium">
