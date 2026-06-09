@@ -1,12 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { 
   FileText, 
   Users, 
@@ -15,7 +23,10 @@ import {
   Check,
   X,
   RotateCcw,
-  ChevronRight
+  ChevronRight,
+  CalendarClock,
+  Building2,
+  ClipboardList
 } from "lucide-react"
 
 // 模拟项目详情数据
@@ -39,7 +50,6 @@ const projectDetail = {
   undergraduateCount: 18,
   masterCount: 8,
   doctorCount: 4,
-  studentsUncertain: false,
   
   // 延续项目信息
   isContinuation: true,
@@ -67,7 +77,29 @@ const projectDetail = {
   selfFundTotal: 135000,
   expenseIncludes: "1. 国际旅费：往返机票及境外市内交通\n2. 住宿费：项目期间的住宿费用\n3. 生活费：餐饮、交通等日常开销\n4. 注册费：项目注册及相关学费\n5. 保险费：境外意外医疗保险",
   expenseExcludes: "1. 护照办理及签证申请费用\n2. 学生从所在地至出发口岸的往返交通费用\n3. 学生个人消费（如购物、娱乐等）\n4. 因个人原因导致的额外费用\n5. 行李超重费用",
-  
+
+  // 是否联合申报
+  isJoint: false,
+
+  // 具体安排及进度
+  schedule:
+    "1. 准备阶段（2024年4-5月）：完成项目宣讲、学生选拔与资格审核，签订相关协议。\n2. 行前培训（2024年6月）：组织行前安全教育、跨文化适应培训，签署责任书。\n3. 项目实施（2024年7月）：学生赴G国H大学开展为期30天的课程学习与实践交流。\n4. 总结验收（2024年8月）：收集学习报告、开展项目满意度调查、形成项目总结。",
+
+  // 项目组成员情况（非联合申报）
+  leadMembers: {
+    leader: { name: "李建国", email: "lijg@cqu.edu.cn", phone: "023-65111001 / 138****0001" },
+    contact: { name: "王晓敏", email: "wangxm@cqu.edu.cn", phone: "023-65111002 / 138****0002" },
+  },
+  otherMembers: [
+    { name: "张伟", work: "项目总负责、课程对接", email: "zhangw@cqu.edu.cn", phone: "023-65111003 / 138****0003" },
+    { name: "刘洋", work: "学生管理、行前培训", email: "liuy@cqu.edu.cn", phone: "023-65111004 / 138****0004" },
+    { name: "陈静", work: "经费管理、后勤保障", email: "chenj@cqu.edu.cn", phone: "023-65111005 / 138****0005" },
+  ],
+
+  // 申请单位承诺及意见
+  commitment:
+    "我单位将遵照《重庆大学学生出国（境）交流资助经费管理办法》（重大校发〔2025〕44号）等相关工作文件及学校财务等相关工作制度开展相关工作。我单位将为学生组织行前培训，做好行前培训会议记录并组织学生签署《重庆大学出国（境）学习交流责任书》，学生签署完毕后组织在本单位存档。若有违反，本单位将承担相应责任。",
+
   // 审核流程
   reviewFlow: [
     {
@@ -91,24 +123,68 @@ const projectDetail = {
   ],
 }
 
+// 联合申报版项目详情（覆盖部分字段）
+const jointProjectDetail = {
+  ...projectDetail,
+  id: "PA202403003",
+  projectName: "A国J大学经济管理联合培养项目",
+  applyUnit: "管理学院",
+  applicant: "刘芳副教授",
+  applyTime: "2024-03-13",
+  isJoint: true,
+
+  // 联合申报单位信息
+  jointUnits: [
+    {
+      role: "主办单位",
+      unitName: "重庆大学管理学院",
+      leader: { name: "刘芳", email: "liuf@cqu.edu.cn", phone: "023-65222001 / 139****0001" },
+      contact: { name: "周文", email: "zhouw@cqu.edu.cn", phone: "023-65222002 / 139****0002" },
+    },
+    {
+      role: "参与单位",
+      unitName: "重庆大学经济学院",
+      leader: { name: "孙强", email: "sunq@cqu.edu.cn", phone: "023-65222003 / 139****0003" },
+      contact: { name: "赵敏", email: "zhaom@cqu.edu.cn", phone: "023-65222004 / 139****0004" },
+    },
+  ],
+}
+
 export default function ProjectApplicationReviewDetailPage() {
   const router = useRouter()
+  const params = useParams()
   const searchParams = useSearchParams()
   const isViewMode = searchParams.get("mode") === "view"
-  
+
+  // 根据路由 id 判断是否为联合申报项目，分别展示对应详情
+  const routeId = String(params?.id ?? "")
+  const detail = routeId === jointProjectDetail.id ? jointProjectDetail : projectDetail
+
   const [fundPerStudent, setFundPerStudent] = useState("")
   const [maxStudentCount, setMaxStudentCount] = useState("")
   const [reviewRemark, setReviewRemark] = useState("")
   const [selectedAction, setSelectedAction] = useState<"approve" | "reject" | "return" | null>(null)
 
-  const handleReviewAction = (action: "approve" | "reject" | "return") => {
+  // 驳回理由弹窗
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
+
+  const handleReviewAction = (action: "approve" | "return") => {
     setSelectedAction(action)
     // 实际提交逻辑
     router.push("/admin/project-application-review")
   }
 
-  const publicFundTotal = projectDetail.schoolFundTotal + projectDetail.unitFundTotal
-  const schoolFundPercent = Math.round((projectDetail.schoolFundTotal / publicFundTotal) * 100)
+  const handleConfirmReject = () => {
+    if (!rejectReason.trim()) return
+    setSelectedAction("reject")
+    // 实际提交逻辑（携带驳回理由 rejectReason）
+    setRejectDialogOpen(false)
+    router.push("/admin/project-application-review")
+  }
+
+  const publicFundTotal = detail.schoolFundTotal + detail.unitFundTotal
+  const schoolFundPercent = Math.round((detail.schoolFundTotal / publicFundTotal) * 100)
   const unitFundPercent = 100 - schoolFundPercent
 
   return (
@@ -131,13 +207,25 @@ export default function ProjectApplicationReviewDetailPage() {
         <CardContent className="pt-6">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-lg font-semibold">{projectDetail.projectName}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold">{detail.projectName}</h2>
+                <Badge
+                  variant="outline"
+                  className={
+                    detail.isJoint
+                      ? "bg-blue-50 text-blue-600 border-blue-200"
+                      : "bg-muted text-muted-foreground border-transparent"
+                  }
+                >
+                  联合申报：{detail.isJoint ? "是" : "否"}
+                </Badge>
+              </div>
               <p className="text-sm text-muted-foreground mt-1">
-                申报单位：{projectDetail.applyUnit}　　申报人：{projectDetail.applicant}　　申报时间：{projectDetail.applyTime}
+                申报单位：{detail.applyUnit}　　申报人：{detail.applicant}　　申报时间：{detail.applyTime}
               </p>
             </div>
             <Badge className="bg-amber-100 text-amber-600 border-0">
-              {projectDetail.status}
+              {detail.status}
             </Badge>
           </div>
         </CardContent>
@@ -149,7 +237,7 @@ export default function ProjectApplicationReviewDetailPage() {
           <h3 className="font-semibold mb-6">审核流程</h3>
           
           <div className="relative">
-            {projectDetail.reviewFlow.map((step, index) => (
+            {detail.reviewFlow.map((step, index) => (
               <div key={step.step} className="flex gap-4 mb-6 last:mb-0">
                 {/* 左侧时间线 */}
                 <div className="flex flex-col items-center">
@@ -160,7 +248,7 @@ export default function ProjectApplicationReviewDetailPage() {
                   }`}>
                     {step.status === "completed" ? <Check className="h-4 w-4" /> : step.step}
                   </div>
-                  {index < projectDetail.reviewFlow.length - 1 && (
+                  {index < detail.reviewFlow.length - 1 && (
                     <div className={`w-0.5 flex-1 mt-2 ${
                       step.status === "completed" ? "bg-green-500" : "bg-amber-300"
                     }`} />
@@ -210,27 +298,27 @@ export default function ProjectApplicationReviewDetailPage() {
             <div className="grid grid-cols-4 gap-6">
               <div>
                 <p className="text-xs text-primary mb-1">项目名称</p>
-                <p className="text-sm font-medium">{projectDetail.projectName}</p>
+                <p className="text-sm font-medium">{detail.projectName}</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">项目类别</p>
-                <p className="text-sm font-medium">{projectDetail.projectType}</p>
+                <p className="text-sm font-medium">{detail.projectType}</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">项目级别</p>
-                <p className="text-sm font-medium">{projectDetail.projectLevel}</p>
+                <p className="text-sm font-medium">{detail.projectLevel}</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">开始时间</p>
-                <p className="text-sm font-medium">{projectDetail.startDate}</p>
+                <p className="text-sm font-medium">{detail.startDate}</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">结束时间</p>
-                <p className="text-sm font-medium">{projectDetail.endDate}</p>
+                <p className="text-sm font-medium">{detail.endDate}</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">项目周期</p>
-                <p className="text-sm font-medium">{projectDetail.duration}天</p>
+                <p className="text-sm font-medium">{detail.duration}天</p>
               </div>
             </div>
 
@@ -243,28 +331,24 @@ export default function ProjectApplicationReviewDetailPage() {
             <div className="grid grid-cols-4 gap-6">
               <div>
                 <p className="text-xs text-primary mb-1">拟选派学生总人数</p>
-                <p className="text-sm font-medium">{projectDetail.totalStudents}人</p>
+                <p className="text-sm font-medium">{detail.totalStudents}人</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">计划本科生人数</p>
-                <p className="text-sm font-medium">{projectDetail.undergraduateCount}人</p>
+                <p className="text-sm font-medium">{detail.undergraduateCount}人</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">计划硕研人数</p>
-                <p className="text-sm font-medium">{projectDetail.masterCount}人</p>
+                <p className="text-sm font-medium">{detail.masterCount}人</p>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">计划博研人数</p>
-                <p className="text-sm font-medium">{projectDetail.doctorCount}人</p>
-              </div>
-              <div>
-                <p className="text-xs text-primary mb-1">人数完全不确定</p>
-                <p className="text-sm font-medium">{projectDetail.studentsUncertain ? "是" : "否"}</p>
+                <p className="text-sm font-medium">{detail.doctorCount}人</p>
               </div>
             </div>
 
             {/* 延续项目信息 */}
-            {projectDetail.isContinuation && projectDetail.relatedProject && (
+            {detail.isContinuation && detail.relatedProject && (
               <>
                 <div className="flex items-center gap-2 text-primary mt-8 mb-4">
                   <Link2 className="h-4 w-4" />
@@ -278,19 +362,19 @@ export default function ProjectApplicationReviewDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs text-primary mb-1">关联的历史项目名称</p>
-                    <p className="text-sm font-medium">{projectDetail.relatedProject.name}</p>
+                    <p className="text-sm font-medium">{detail.relatedProject.name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-primary mb-1">历史项目负责人</p>
-                    <p className="text-sm font-medium">{projectDetail.relatedProject.leader}</p>
+                    <p className="text-xs text-primary mb-1">历史项目��责人</p>
+                    <p className="text-sm font-medium">{detail.relatedProject.leader}</p>
                   </div>
                   <div>
                     <p className="text-xs text-primary mb-1">历史申报时间</p>
-                    <p className="text-sm font-medium">{projectDetail.relatedProject.applyTime}</p>
+                    <p className="text-sm font-medium">{detail.relatedProject.applyTime}</p>
                   </div>
                   <div>
                     <p className="text-xs text-primary mb-1">历史原学生人数</p>
-                    <p className="text-sm font-medium">{projectDetail.relatedProject.students}人</p>
+                    <p className="text-sm font-medium">{detail.relatedProject.students}人</p>
                   </div>
                 </div>
               </>
@@ -306,21 +390,31 @@ export default function ProjectApplicationReviewDetailPage() {
               <div>
                 <p className="text-xs text-primary mb-1">立项背景</p>
                 <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{projectDetail.background}</p>
+                  <p className="text-sm whitespace-pre-wrap">{detail.background}</p>
                 </div>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">拟合作方基本情况</p>
                 <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{projectDetail.partnerInfo}</p>
+                  <p className="text-sm whitespace-pre-wrap">{detail.partnerInfo}</p>
                 </div>
               </div>
               <div>
                 <p className="text-xs text-primary mb-1">预期成果与目标</p>
                 <div className="p-3 bg-muted/50 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{projectDetail.expectedOutcome}</p>
+                  <p className="text-sm whitespace-pre-wrap">{detail.expectedOutcome}</p>
                 </div>
               </div>
+            </div>
+
+            {/* 具体安排及进度 */}
+            <div className="flex items-center gap-2 text-primary mt-8 mb-4">
+              <CalendarClock className="h-4 w-4" />
+              <span className="text-sm font-medium">具体安排及进度</span>
+            </div>
+
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm whitespace-pre-wrap">{detail.schedule}</p>
             </div>
 
             {/* 经费预算 */}
@@ -337,15 +431,15 @@ export default function ProjectApplicationReviewDetailPage() {
                     <div className="grid grid-cols-3 gap-6">
                       <div>
                         <p className="text-xs text-primary mb-1">项目费用（元/生）</p>
-                        <p className="text-sm font-medium">¥{projectDetail.costPerStudent.toLocaleString()}</p>
+                        <p className="text-sm font-medium">¥{detail.costPerStudent.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-xs text-primary mb-1">预计学生人数</p>
-                        <p className="text-sm font-medium">{projectDetail.totalStudents}人</p>
+                        <p className="text-sm font-medium">{detail.totalStudents}人</p>
                       </div>
                       <div>
                         <p className="text-xs text-primary mb-1">项目费用合计</p>
-                        <p className="text-sm font-medium text-primary">¥{projectDetail.totalCost.toLocaleString()}</p>
+                        <p className="text-sm font-medium text-primary">¥{detail.totalCost.toLocaleString()}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -358,13 +452,13 @@ export default function ProjectApplicationReviewDetailPage() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">2.1 项目费用包含项</p>
                     <div className="p-3 bg-muted/30 rounded-lg">
-                      <p className="text-sm whitespace-pre-wrap">{projectDetail.expenseIncludes}</p>
+                      <p className="text-sm whitespace-pre-wrap">{detail.expenseIncludes}</p>
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">2.2 项目费用不包含项</p>
                     <div className="p-3 bg-muted/30 rounded-lg">
-                      <p className="text-sm whitespace-pre-wrap">{projectDetail.expenseExcludes}</p>
+                      <p className="text-sm whitespace-pre-wrap">{detail.expenseExcludes}</p>
                     </div>
                   </div>
                 </div>
@@ -380,15 +474,15 @@ export default function ProjectApplicationReviewDetailPage() {
                         <div className="grid grid-cols-3 gap-6">
                           <div>
                             <p className="text-xs text-primary mb-1">经费标准（元/生）</p>
-                            <p className="text-sm font-medium">¥{projectDetail.schoolFundPerStudent.toLocaleString()}</p>
+                            <p className="text-sm font-medium">¥{detail.schoolFundPerStudent.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">人数</p>
-                            <p className="text-sm font-medium">{projectDetail.totalStudents}人</p>
+                            <p className="text-sm font-medium">{detail.totalStudents}人</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">小计</p>
-                            <p className="text-sm font-medium text-primary">¥{projectDetail.schoolFundTotal.toLocaleString()}</p>
+                            <p className="text-sm font-medium text-primary">¥{detail.schoolFundTotal.toLocaleString()}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -402,15 +496,15 @@ export default function ProjectApplicationReviewDetailPage() {
                         <div className="grid grid-cols-3 gap-6">
                           <div>
                             <p className="text-xs text-primary mb-1">经费标准（元/生）</p>
-                            <p className="text-sm font-medium">¥{projectDetail.unitFundPerStudent.toLocaleString()}</p>
+                            <p className="text-sm font-medium">¥{detail.unitFundPerStudent.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">人数</p>
-                            <p className="text-sm font-medium">{projectDetail.totalStudents}人</p>
+                            <p className="text-sm font-medium">{detail.totalStudents}人</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">小计</p>
-                            <p className="text-sm font-medium text-primary">¥{projectDetail.unitFundTotal.toLocaleString()}</p>
+                            <p className="text-sm font-medium text-primary">¥{detail.unitFundTotal.toLocaleString()}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -424,11 +518,11 @@ export default function ProjectApplicationReviewDetailPage() {
                         <div className="grid grid-cols-3 gap-6">
                           <div>
                             <p className="text-xs text-primary mb-1">经费标准（元/生）</p>
-                            <p className="text-sm font-medium">¥{projectDetail.selfFundPerStudent.toLocaleString()}</p>
+                            <p className="text-sm font-medium">¥{detail.selfFundPerStudent.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">小计</p>
-                            <p className="text-sm font-medium text-primary">¥{projectDetail.selfFundTotal.toLocaleString()}</p>
+                            <p className="text-sm font-medium text-primary">¥{detail.selfFundTotal.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-xs text-primary mb-1">备注</p>
@@ -455,14 +549,134 @@ export default function ProjectApplicationReviewDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs text-white/80 mb-1">学生自筹总计</p>
-                    <p className="text-xl font-bold">¥{projectDetail.selfFundTotal.toLocaleString()}</p>
+                    <p className="text-xl font-bold">¥{detail.selfFundTotal.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-white/80 mb-1">项目总经费</p>
-                    <p className="text-2xl font-bold">¥{projectDetail.totalCost.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">¥{detail.totalCost.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* 项目组成员情况 */}
+            <div className="flex items-center gap-2 text-primary mt-8 mb-4">
+              <Users className="h-4 w-4" />
+              <span className="text-sm font-medium">项目组成员情况</span>
+            </div>
+
+            {detail.isJoint ? (
+              <div className="space-y-4">
+                {(detail as typeof jointProjectDetail).jointUnits.map((unit, idx) => (
+                  <Card key={idx} className="bg-muted/30">
+                    <CardContent className="pt-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                          {unit.role}
+                        </Badge>
+                        <span className="text-sm font-medium">{unit.unitName}</span>
+                      </div>
+                      <div className="overflow-x-auto rounded-md border bg-background">
+                        <table className="w-full border-collapse text-sm">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="border-b border-r p-2 text-center font-medium text-primary w-32">类别</th>
+                              <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+                              <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+                              <th className="border-b p-2 text-center font-medium text-primary">座机电话及手机电话</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="border-b border-r p-2 text-center font-medium bg-muted/30">主要负责领导</td>
+                              <td className="border-b border-r p-2 text-center">{unit.leader.name}</td>
+                              <td className="border-b border-r p-2 text-center">{unit.leader.email}</td>
+                              <td className="border-b p-2 text-center">{unit.leader.phone}</td>
+                            </tr>
+                            <tr>
+                              <td className="border-r p-2 text-center font-medium bg-muted/30">主要经办及联络人</td>
+                              <td className="border-r p-2 text-center">{unit.contact.name}</td>
+                              <td className="border-r p-2 text-center">{unit.contact.email}</td>
+                              <td className="p-2 text-center">{unit.contact.phone}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* 项目组主要成员情况 */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">项目组主要成员情况</p>
+                  <div className="overflow-x-auto rounded-md border bg-background">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="border-b border-r p-2 text-center font-medium text-primary w-32" />
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+                          <th className="border-b p-2 text-center font-medium text-primary">座机电话及手机电话</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border-b border-r p-2 text-center font-medium bg-muted/30">主要负责领导</td>
+                          <td className="border-b border-r p-2 text-center">{detail.leadMembers.leader.name}</td>
+                          <td className="border-b border-r p-2 text-center">{detail.leadMembers.leader.email}</td>
+                          <td className="border-b p-2 text-center">{detail.leadMembers.leader.phone}</td>
+                        </tr>
+                        <tr>
+                          <td className="border-r p-2 text-center font-medium bg-muted/30">主要经办及联络人</td>
+                          <td className="border-r p-2 text-center">{detail.leadMembers.contact.name}</td>
+                          <td className="border-r p-2 text-center">{detail.leadMembers.contact.email}</td>
+                          <td className="p-2 text-center">{detail.leadMembers.contact.phone}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 项目其他成员情况 */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">项目其他成员情况</p>
+                  <div className="overflow-x-auto rounded-md border bg-background">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">承担工作</th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+                          <th className="border-b p-2 text-center font-medium text-primary">办公室座机及手机</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.otherMembers.map((m, idx) => (
+                          <tr key={idx}>
+                            <td className="border-b border-r p-2 text-center">{m.name}</td>
+                            <td className="border-b border-r p-2 text-center">{m.work}</td>
+                            <td className="border-b border-r p-2 text-center">{m.email}</td>
+                            <td className="border-b p-2 text-center">{m.phone}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 申请单位承诺及意见 */}
+            <div className="flex items-center gap-2 text-primary mt-8 mb-4">
+              <ClipboardList className="h-4 w-4" />
+              <span className="text-sm font-medium">申请单位承诺及意见</span>
+            </div>
+
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{detail.commitment}</p>
             </div>
           </div>
         </CardContent>
@@ -487,7 +701,7 @@ export default function ProjectApplicationReviewDetailPage() {
                 <Button 
                   variant="destructive"
                   className="gap-2"
-                  onClick={() => handleReviewAction("reject")}
+                  onClick={() => setRejectDialogOpen(true)}
                 >
                   <X className="h-4 w-4" />
                   驳回
@@ -566,6 +780,44 @@ export default function ProjectApplicationReviewDetailPage() {
           返回列表
         </Button>
       </div>
+
+      {/* 驳回理由弹窗 */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>驳回申报</DialogTitle>
+            <DialogDescription>
+              驳回后将退回给申报单位，请填写驳回理由，便于申报单位了解原因并进行修改。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              驳回理由 <span className="text-red-500">*</span>
+            </label>
+            <Textarea
+              placeholder="请输入驳回理由..."
+              rows={4}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            {rejectDialogOpen && !rejectReason.trim() && (
+              <p className="text-xs text-red-500">驳回理由不能为空</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!rejectReason.trim()}
+              onClick={handleConfirmReject}
+            >
+              确认驳回
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

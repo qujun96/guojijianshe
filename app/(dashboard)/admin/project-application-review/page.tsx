@@ -25,7 +25,6 @@ import { AIAssistantPanel } from "@/components/ai/ai-assistant-panel"
 import { 
   Search, 
   RotateCcw, 
-  Calendar, 
   ClipboardCheck,
   BarChart3,
   Clock,
@@ -167,27 +166,14 @@ const statusConfig: Record<string, { color: string; bgColor: string; dotColor: s
   "已驳回": { color: "text-red-600", bgColor: "bg-red-100", dotColor: "bg-red-500" },
 }
 
-const units = [
-  "全部单位",
-  "电气工程学院",
-  "信息工程学院",
-  "管理学院",
-  "机械工程学院",
-  "土木工程学院",
-  "经济学院",
-  "计算机学院",
-  "外国语学院",
-  "法学院",
-  "建筑学院",
-  "医学院",
-]
-
 export default function ProjectApplicationReviewPage() {
   const router = useRouter()
   const [filter, setFilter] = useState("all")
   const [searchName, setSearchName] = useState("")
-  const [searchUnit, setSearchUnit] = useState("全部单位")
+  const [searchUnit, setSearchUnit] = useState("")
   const [searchStatus, setSearchStatus] = useState("全部状态")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
 
   const getFilteredApplications = () => {
     let filtered = applications
@@ -208,11 +194,19 @@ export default function ProjectApplicationReviewPage() {
         app.projectName.toLowerCase().includes(searchName.toLowerCase())
       )
     }
-    if (searchUnit && searchUnit !== "全部单位") {
-      filtered = filtered.filter(app => app.applyUnit === searchUnit)
+    if (searchUnit) {
+      filtered = filtered.filter(app => 
+        app.applyUnit.toLowerCase().includes(searchUnit.toLowerCase())
+      )
     }
     if (searchStatus && searchStatus !== "全部状态") {
       filtered = filtered.filter(app => app.reviewStatus === searchStatus)
+    }
+    if (startDate) {
+      filtered = filtered.filter(app => app.applyTime >= startDate)
+    }
+    if (endDate) {
+      filtered = filtered.filter(app => app.applyTime <= endDate)
     }
 
     return filtered
@@ -222,8 +216,10 @@ export default function ProjectApplicationReviewPage() {
 
   const handleReset = () => {
     setSearchName("")
-    setSearchUnit("全部单位")
+    setSearchUnit("")
     setSearchStatus("全部状态")
+    setStartDate("")
+    setEndDate("")
   }
 
   const getStatusCounts = () => {
@@ -338,16 +334,11 @@ export default function ProjectApplicationReviewPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-sm text-muted-foreground">申报单位</label>
-                <Select value={searchUnit} onValueChange={setSearchUnit}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="全部单位" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map(unit => (
-                      <SelectItem key={unit} value={unit}>{unit}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="请输入申报单位名称"
+                  value={searchUnit}
+                  onChange={(e) => setSearchUnit(e.target.value)}
+                />
               </div>
               <div className="space-y-1">
                 <label className="text-sm text-muted-foreground">审核状态</label>
@@ -366,8 +357,19 @@ export default function ProjectApplicationReviewPage() {
               <div className="space-y-1">
                 <label className="text-sm text-muted-foreground">申报时间</label>
                 <div className="flex items-center gap-2">
-                  <Input type="date" />
-                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    aria-label="开始日期"
+                  />
+                  <span className="text-muted-foreground text-sm flex-shrink-0">至</span>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    aria-label="结束日期"
+                  />
                 </div>
               </div>
               <div className="flex items-end gap-2">
