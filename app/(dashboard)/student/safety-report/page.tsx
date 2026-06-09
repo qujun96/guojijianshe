@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -60,6 +61,23 @@ const safetyStatusOptions = [
   },
 ]
 
+// "需要关注"可勾选的填报项
+const attentionTopics = [
+  { value: "psychological", label: "心理状态" },
+  { value: "physical", label: "身体状况" },
+  { value: "academic", label: "学业压力/进展" },
+  { value: "social", label: "人际交往" },
+  { value: "living", label: "生活事务" },
+]
+
+// "紧急求助"可勾选的填报项
+const emergencyTopics = [
+  { value: "ideology", label: "意识形态/文化冲突" },
+  { value: "safety", label: "人身安全" },
+  { value: "medical", label: "医疗危急" },
+  { value: "other", label: "其他" },
+]
+
 // 历史汇报记录
 const reportHistory = [
   {
@@ -97,6 +115,15 @@ export default function SafetyReportPage() {
   const [selectedStatus, setSelectedStatus] = useState("safe")
   const [location, setLocation] = useState("G国伦敦市·H大学校区")
   const [note, setNote] = useState("")
+  // 勾选的填报项及各项说明文字
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
+  const [topicNotes, setTopicNotes] = useState<Record<string, string>>({})
+
+  const toggleTopic = (value: string) => {
+    setSelectedTopics((prev) =>
+      prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value],
+    )
+  }
 
   const currentStatus = getStatusMeta(selectedStatus)
 
@@ -190,9 +217,20 @@ export default function SafetyReportPage() {
                   <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <Siren className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
                     <div className="text-sm">
-                      <p className="font-medium text-red-700">紧急情况已启动快速响应</p>
-                      <p className="text-red-600 mt-1">
-                        提交后将立即通知带队老师与学校管理人员。如有生命危险，请优先拨打当地紧急电话或中国驻当地使领馆电话。
+                      <p className="text-red-600">
+                        如有生命危险，请优先拨打当地紧急电话或中国驻当地使领馆电话。
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 需要关注提示 */}
+                {selectedStatus === "attention" && (
+                  <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <ShieldAlert className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="text-amber-700">
+                        请您尽快联系项目管理员以及您的辅导员（或导师），主动说明当前情况，以便获得针对性协助。
                       </p>
                     </div>
                   </div>
@@ -213,16 +251,73 @@ export default function SafetyReportPage() {
                 </div>
 
                 {/* 情况说明 */}
-                <div className="space-y-2">
-                  <Label>情况说明</Label>
-                  <Textarea
-                    placeholder="简要描述您本周的学习生活情况，如有困难或需要协助也可在此说明..."
-                    className="min-h-[120px]"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                  />
-                  <div className="text-xs text-muted-foreground text-right">{note.length}/500</div>
-                </div>
+                {selectedStatus === "safe" ? (
+                  <div className="space-y-2">
+                    <Label>情况说明</Label>
+                    <Textarea
+                      placeholder="简要描述您本周的学习生活情况，如有困难或需要协助也可在此说明..."
+                      className="min-h-[120px]"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                    <div className="text-xs text-muted-foreground text-right">{note.length}/500</div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                      情况说明
+                      <span className="text-xs font-normal text-muted-foreground">
+                        请勾选需要说明的事项并填写具体情况
+                      </span>
+                    </Label>
+                    <div className="space-y-3">
+                      {(selectedStatus === "attention" ? attentionTopics : emergencyTopics).map(
+                        (topic) => {
+                          const checked = selectedTopics.includes(topic.value)
+                          return (
+                            <div
+                              key={topic.value}
+                              className={`rounded-lg border p-3 transition-colors ${
+                                checked
+                                  ? selectedStatus === "attention"
+                                    ? "border-amber-300 bg-amber-50/50"
+                                    : "border-red-300 bg-red-50/50"
+                                  : "border-border"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Checkbox
+                                  id={`topic-${topic.value}`}
+                                  checked={checked}
+                                  onCheckedChange={() => toggleTopic(topic.value)}
+                                />
+                                <Label
+                                  htmlFor={`topic-${topic.value}`}
+                                  className="cursor-pointer font-medium"
+                                >
+                                  {topic.label}
+                                </Label>
+                              </div>
+                              {checked && (
+                                <Textarea
+                                  placeholder={`请描述「${topic.label}」的具体情况...`}
+                                  className="mt-3 min-h-[80px]"
+                                  value={topicNotes[topic.value] || ""}
+                                  onChange={(e) =>
+                                    setTopicNotes((prev) => ({
+                                      ...prev,
+                                      [topic.value]: e.target.value,
+                                    }))
+                                  }
+                                />
+                              )}
+                            </div>
+                          )
+                        },
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* 附件 */}
                 <div className="space-y-2">
