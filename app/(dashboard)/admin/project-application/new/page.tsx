@@ -129,6 +129,32 @@ export default function NewProjectApplicationPage() {
 
   // 项目内容描述（富文本）
   const [projectContent, setProjectContent] = useState("")
+
+  // 具体安排及进度（富文本）
+  const [projectSchedule, setProjectSchedule] = useState("")
+
+  // 各单位配套经费（联合申报时使用）
+  const [fundingUnitRows, setFundingUnitRows] = useState([
+    { id: 1, unitName: "", studentCount: "", amountPerStudent: "", amountTotal: "" },
+    { id: 2, unitName: "", studentCount: "", amountPerStudent: "", amountTotal: "" },
+  ])
+
+  const addFundingRow = () => {
+    setFundingUnitRows((prev) => [
+      ...prev,
+      { id: Date.now(), unitName: "", studentCount: "", amountPerStudent: "", amountTotal: "" },
+    ])
+  }
+
+  const removeFundingRow = (id: number) => {
+    setFundingUnitRows((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== id) : prev))
+  }
+
+  const updateFundingRow = (id: number, field: string, value: string) => {
+    setFundingUnitRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
+    )
+  }
   
   // 经费预算
   const [costPerStudent, setCostPerStudent] = useState("")
@@ -659,12 +685,40 @@ export default function NewProjectApplicationPage() {
         </CardContent>
       </Card>
 
-      {/* 模块6：经费预算 */}
+      {/* 模块6：具体安排及进度 */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
               6
+            </div>
+            <h2 className="text-base font-semibold">具体安排及进度</h2>
+          </div>
+          <div className="h-px bg-primary mb-6" />
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-primary">
+              <PenLine className="h-4 w-4" />
+              <Label className="text-foreground font-medium">安排及进度</Label>
+            </div>
+            <RichTextEditor
+              value={projectSchedule}
+              onChange={setProjectSchedule}
+              minHeight={240}
+              placeholder={
+                "需填写申报项目全阶段工作内容、分工协作模式、项目准备的时间进度等方面。"
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 模块7：经费预算 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+              7
             </div>
             <h2 className="text-base font-semibold">经费预算、申请单位承诺、意见</h2>
           </div>
@@ -773,33 +827,124 @@ export default function NewProjectApplicationPage() {
               </div>
 
               <div>
-                <p className="text-sm font-medium mb-2">3.2 本单位配套经费</p>
-                <div className="flex items-center gap-4">
-                  <Label className="text-foreground whitespace-nowrap">本单位配套经费</Label>
-                  <Input 
-                    className="w-32" 
-                    type="number"
-                    placeholder="8000"
-                    value={unitFundPerStudent}
-                    onChange={(e) => setUnitFundPerStudent(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">元/生</span>
-                  <span className="text-muted-foreground">，预计</span>
-                  <Input 
-                    className="w-24" 
-                    type="number"
-                    placeholder="30"
-                    value={unitFundStudentCount}
-                    onChange={(e) => setUnitFundStudentCount(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">名学生，共计</span>
-                  <Input 
-                    className="w-32 bg-blue-50 text-primary font-medium" 
-                    value={unitFundTotal.toLocaleString()} 
-                    disabled 
-                  />
-                  <span className="text-muted-foreground">元</span>
-                </div>
+                <p className="text-sm font-medium mb-2">
+                  3.2 {hasJointUnit ? "各单位配套经费" : "本单位配套经费"}
+                </p>
+                {hasJointUnit ? (
+                  <div className="space-y-3">
+                    <div className="overflow-x-auto rounded-md border bg-background">
+                      <table className="w-full border-collapse text-sm">
+                        <thead>
+                          <tr className="bg-muted/50">
+                            <th className="border-b border-r p-2 text-center font-medium text-primary min-w-[180px]">
+                              单位名称
+                            </th>
+                            <th className="border-b border-r p-2 text-center font-medium text-primary">
+                              拟资助学生人数
+                            </th>
+                            <th className="border-b border-r p-2 text-center font-medium text-primary">
+                              资助金额（元/生）
+                            </th>
+                            <th className="border-b border-r p-2 text-center font-medium text-primary">
+                              资助金额（总）
+                            </th>
+                            <th className="border-b p-2 text-center font-medium text-primary w-16">
+                              操作
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {fundingUnitRows.map((row, index) => (
+                            <tr key={row.id}>
+                              <td className="border-b border-r p-1.5">
+                                <Input
+                                  placeholder={index === 0 ? "主办单位名称" : "参与单位名称"}
+                                  value={row.unitName}
+                                  onChange={(e) => updateFundingRow(row.id, "unitName", e.target.value)}
+                                  className="border-0 shadow-none focus-visible:ring-0"
+                                />
+                              </td>
+                              <td className="border-b border-r p-1.5">
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  value={row.studentCount}
+                                  onChange={(e) => updateFundingRow(row.id, "studentCount", e.target.value)}
+                                  className="border-0 shadow-none focus-visible:ring-0 text-center"
+                                />
+                              </td>
+                              <td className="border-b border-r p-1.5">
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  value={row.amountPerStudent}
+                                  onChange={(e) => updateFundingRow(row.id, "amountPerStudent", e.target.value)}
+                                  className="border-0 shadow-none focus-visible:ring-0 text-center"
+                                />
+                              </td>
+                              <td className="border-b border-r p-1.5">
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  value={row.amountTotal}
+                                  onChange={(e) => updateFundingRow(row.id, "amountTotal", e.target.value)}
+                                  className="border-0 shadow-none focus-visible:ring-0 text-center"
+                                />
+                              </td>
+                              <td className="border-b p-1.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => removeFundingRow(row.id)}
+                                  disabled={fundingUnitRows.length <= 1}
+                                  title="删除该行"
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        注：第一行填写主办单位，其余行填写参与单位
+                      </p>
+                      <Button variant="outline" size="sm" onClick={addFundingRow}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        添加单位
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <Label className="text-foreground whitespace-nowrap">本单位配套经费</Label>
+                    <Input 
+                      className="w-32" 
+                      type="number"
+                      placeholder="8000"
+                      value={unitFundPerStudent}
+                      onChange={(e) => setUnitFundPerStudent(e.target.value)}
+                    />
+                    <span className="text-muted-foreground">元/生</span>
+                    <span className="text-muted-foreground">，预计</span>
+                    <Input 
+                      className="w-24" 
+                      type="number"
+                      placeholder="30"
+                      value={unitFundStudentCount}
+                      onChange={(e) => setUnitFundStudentCount(e.target.value)}
+                    />
+                    <span className="text-muted-foreground">名学生，共计</span>
+                    <Input 
+                      className="w-32 bg-blue-50 text-primary font-medium" 
+                      value={unitFundTotal.toLocaleString()} 
+                      disabled 
+                    />
+                    <span className="text-muted-foreground">元</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -881,11 +1026,22 @@ export default function NewProjectApplicationPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* 申请单位承诺及意见 */}
+            <div className="flex items-center gap-2 text-primary mt-8 mb-4">
+              <div className="w-1 h-4 bg-primary rounded" />
+              <span className="text-sm font-medium">（二）申请单位承诺及意见</span>
+            </div>
+            <Card className="bg-muted/30">
+              <CardContent className="pt-4">
+                <p className="text-sm leading-relaxed text-foreground text-pretty">
+                  我单位将遵照《重庆大学学生出国（境）交流资助经费管理办法》（重大校发〔2025〕44号）等相关工作文件及学校财务等相关工作制度开展相关工作。我单位将为学生组织行前培训，做好行前培训会议记录并组织学生签署《重庆大学出国（境）学习交流责任书》（可在国际处官网查询模板参考并根据单位具体情况做修改），学生签署完毕后组织在本单位存档。若有违反，本单位将承担相应责任。
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
-
-      {/* 底部操作栏 */}
       <div className="fixed bottom-0 left-56 right-0 bg-background border-t p-4 flex justify-end gap-3 z-10">
         <Button variant="outline" onClick={() => router.back()}>
           取消
