@@ -49,7 +49,6 @@ import {
   MessageSquare,
   History,
   Globe,
-  ChevronRight,
   UserRound,
 } from "lucide-react"
 
@@ -252,12 +251,9 @@ function getStudentHistory(record: SafetyRecord) {
 }
 
   export default function SafetyReportViewPage() {
-  const [searchProject, setSearchProject] = useState("")
-  const [selectedRegion, setSelectedRegion] = useState("all")
-
-  // 项目详情弹窗
-  const [activeProject, setActiveProject] = useState<Project | null>(null)
-  const [showProjectDialog, setShowProjectDialog] = useState(false)
+  const [searchName, setSearchName] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedProject, setSelectedProject] = useState("all")
 
   // 学生详情弹窗
   const [selectedRecord, setSelectedRecord] = useState<SafetyRecord | null>(null)
@@ -325,37 +321,23 @@ function getStudentHistory(record: SafetyRecord) {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // 按项目统计
-  const getProjectRecords = (projectId: string) =>
-    safetyRecords.filter((r) => r.projectId === projectId)
+  // 按项目名称查找
+  const getProjectName = (projectId: string) =>
+    projects.find((p) => p.id === projectId)?.name || "—"
 
-  const getProjectStats = (projectId: string) => {
-    const records = getProjectRecords(projectId)
-    return {
-      total: records.length,
-      safe: records.filter((r) => r.status === "safe").length,
-      attention: records.filter((r) => r.status === "attention").length,
-      emergency: records.filter((r) => r.status === "emergency").length,
-      overdue: records.filter((r) => r.status === "overdue").length,
-      reportRate:
-        records.length === 0
-          ? 0
-          : Math.round(
-              (records.filter((r) => r.status !== "overdue").length / records.length) * 100
-            ),
+  // 列表筛选
+  const filteredRecords = safetyRecords.filter((record) => {
+    if (
+      searchName &&
+      !record.studentName.includes(searchName) &&
+      !record.studentId.includes(searchName)
+    ) {
+      return false
     }
-  }
-
-  const filteredProjects = projects.filter((p) => {
-    if (searchProject && !p.name.includes(searchProject)) return false
-    if (selectedRegion !== "all" && p.region !== selectedRegion) return false
+    if (selectedStatus !== "all" && record.status !== selectedStatus) return false
+    if (selectedProject !== "all" && record.projectId !== selectedProject) return false
     return true
   })
-
-  const handleOpenProject = (project: Project) => {
-    setActiveProject(project)
-    setShowProjectDialog(true)
-  }
 
   const handleViewRecord = (record: SafetyRecord) => {
     setSelectedRecord(record)
@@ -567,7 +549,7 @@ function getStudentHistory(record: SafetyRecord) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                项目查询
+                汇报查询
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => setShowLogDialog(true)}>
@@ -592,29 +574,43 @@ function getStudentHistory(record: SafetyRecord) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <Input
-                className="col-span-2"
-                placeholder="项目名称"
-                value={searchProject}
-                onChange={(e) => setSearchProject(e.target.value)}
+                placeholder="学生姓名 / 学号"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
               />
-              <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+              <Select value={selectedProject} onValueChange={setSelectedProject}>
                 <SelectTrigger>
-                  <SelectValue placeholder="所在地区" />
+                  <SelectValue placeholder="所属项目" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">全部地区</SelectItem>
-                  <SelectItem value="亚洲">亚洲</SelectItem>
-                  <SelectItem value="欧洲">欧洲</SelectItem>
-                  <SelectItem value="北美洲">北美洲</SelectItem>
+                  <SelectItem value="all">全部项目</SelectItem>
+                  {projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="安全状态" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部状态</SelectItem>
+                  <SelectItem value="safe">平安</SelectItem>
+                  <SelectItem value="attention">需关注</SelectItem>
+                  <SelectItem value="emergency">紧急</SelectItem>
+                  <SelectItem value="overdue">超期未报</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSearchProject("")
-                  setSelectedRegion("all")
+                  setSearchName("")
+                  setSelectedProject("all")
+                  setSelectedStatus("all")
                 }}
               >
                 <RotateCcw className="h-4 w-4 mr-1" />
@@ -624,88 +620,91 @@ function getStudentHistory(record: SafetyRecord) {
           </CardContent>
         </Card>
 
-        {/* 项目卡片网格 */}
-        <div className="grid grid-cols-2 gap-4">
-          {filteredProjects.map((project) => {
-            const stats = getProjectStats(project.id)
-            const hasAlert = stats.emergency > 0 || stats.overdue > 0
-            return (
-              <Card
-                key={project.id}
-                className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/40 ${
-                  hasAlert ? "border-red-200" : ""
-                }`}
-                onClick={() => handleOpenProject(project)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <CardTitle className="text-base leading-snug text-pretty">
-                        {project.name}
-                      </CardTitle>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Globe className="h-3 w-3" />
-                          {project.region} · {project.country}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {project.period}
-                        </span>
-                      </div>
-                    </div>
-                    {hasAlert && (
-                      <Badge variant="outline" className="shrink-0 text-red-600 border-red-200 bg-red-50">
-                        待处理
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      派出 {stats.total} 人
-                    </span>
-                    <span className="text-muted-foreground">
-                      本周汇报率
-                      <span className={`ml-1 font-semibold ${stats.reportRate >= 80 ? "text-green-600" : "text-amber-600"}`}>
-                        {stats.reportRate}%
-                      </span>
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="rounded-md bg-green-50 p-2 text-center">
-                      <p className="text-base font-semibold text-green-600">{stats.safe}</p>
-                      <p className="text-[11px] text-muted-foreground">平安</p>
-                    </div>
-                    <div className="rounded-md bg-amber-50 p-2 text-center">
-                      <p className="text-base font-semibold text-amber-600">{stats.attention}</p>
-                      <p className="text-[11px] text-muted-foreground">需关注</p>
-                    </div>
-                    <div className="rounded-md bg-red-50 p-2 text-center">
-                      <p className="text-base font-semibold text-red-600">{stats.emergency}</p>
-                      <p className="text-[11px] text-muted-foreground">紧急</p>
-                    </div>
-                    <div className="rounded-md bg-gray-100 p-2 text-center">
-                      <p className="text-base font-semibold text-gray-600">{stats.overdue}</p>
-                      <p className="text-[11px] text-muted-foreground">超期</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end text-sm text-primary">
-                    查看汇报详情
-                    <ChevronRight className="h-4 w-4" />
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-          {filteredProjects.length === 0 && (
-            <div className="col-span-2 py-12 text-center text-sm text-muted-foreground">
-              未找到匹配的项目
+        {/* 安全汇报列表 */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              安全汇报列表
+              <span className="text-sm font-normal text-muted-foreground">
+                共 {filteredRecords.length} 条
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[180px]">学生信息</TableHead>
+                    <TableHead className="min-w-[200px]">所属项目</TableHead>
+                    <TableHead className="min-w-[120px]">当前位置</TableHead>
+                    <TableHead className="min-w-[90px]">安全状态</TableHead>
+                    <TableHead className="min-w-[150px]">最近汇报</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRecords.map((record) => {
+                    const config = statusConfig[record.status]
+                    const StatusIcon = config.icon
+                    return (
+                      <TableRow
+                        key={record.id}
+                        className={record.status === "emergency" ? "bg-red-50/50" : ""}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                {record.studentName.slice(0, 1)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{record.studentName}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {record.studentId} · {record.college}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-pretty">{getProjectName(record.projectId)}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            {record.location}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={config.className}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {config.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            {record.lastReport}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{renderRecordActions(record)}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                  {filteredRecords.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
+                        未找到匹配的汇报记录
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 右侧AI面板 */}
@@ -790,95 +789,6 @@ function getStudentHistory(record: SafetyRecord) {
       </div>
 
       {/* 项目详情弹窗：该项目下学生汇报列表 */}
-      <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
-        <DialogContent className="max-w-4xl sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <Globe className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-pretty">{activeProject?.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-          {activeProject && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {activeProject.region} · {activeProject.country}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
-                  {activeProject.period}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
-                  派出 {getProjectStats(activeProject.id).total} 人
-                </span>
-              </div>
-              <div className="max-h-[55vh] overflow-auto rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[180px]">学生信息</TableHead>
-                      <TableHead className="min-w-[120px]">当前位置</TableHead>
-                      <TableHead className="min-w-[90px]">安全状态</TableHead>
-                      <TableHead className="min-w-[150px]">最近汇报</TableHead>
-                      <TableHead className="text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {getProjectRecords(activeProject.id).map((record) => {
-                      const config = statusConfig[record.status]
-                      const StatusIcon = config.icon
-                      return (
-                        <TableRow
-                          key={record.id}
-                          className={record.status === "emergency" ? "bg-red-50/50" : ""}
-                        >
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                  {record.studentName.slice(0, 1)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-medium text-sm">{record.studentName}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {record.studentId} · {record.college}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              {record.location}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={config.className}>
-                              <StatusIcon className="h-3 w-3 mr-1" />
-                              {config.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm">
-                              <Clock className="h-3 w-3 text-muted-foreground" />
-                              {record.lastReport}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">{renderRecordActions(record)}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
       {/* 学生详情对话框 */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-2xl sm:max-w-2xl">
