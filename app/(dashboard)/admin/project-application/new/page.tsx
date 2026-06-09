@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { RichTextEditor } from "@/components/rich-text-editor"
 import {
   Select,
   SelectContent,
@@ -31,7 +31,10 @@ import {
   Wallet,
   Search,
   X,
-  ChevronRight
+  ChevronRight,
+  Trash2,
+  Plus,
+  PenLine
 } from "lucide-react"
 
 // 模拟历史项目数据
@@ -78,7 +81,6 @@ export default function NewProjectApplicationPage() {
   const [undergraduateCount, setUndergraduateCount] = useState("")
   const [masterCount, setMasterCount] = useState("")
   const [doctorCount, setDoctorCount] = useState("")
-  const [studentsUncertain, setStudentsUncertain] = useState(false)
   
   // 延续项目
   const [isContinuation, setIsContinuation] = useState(false)
@@ -90,15 +92,43 @@ export default function NewProjectApplicationPage() {
   const [background, setBackground] = useState("")
   const [partnerInfo, setPartnerInfo] = useState("")
   const [expectedOutcome, setExpectedOutcome] = useState("")
-  const [completionStandard, setCompletionStandard] = useState("")
+  const [completionStandard, setCompletionStandard] = useState(
+    `一、双学位及学期/访学项目（3个月及以上）
+1.拟达到的学习成效
+2.拟取得学位或学分情况描述
+
+二、寒暑期、短期实习及其他（7天到3个月以内）
+1.拟完成**次课堂授课，其中教授及以上授课**次，副教授**次，讲师**次。其他人员 **次。
+2.拟完成**次参观实践。`
+  )
   
   // 联合申报单位
   const [hasJointUnit, setHasJointUnit] = useState(false)
-  const [jointUnitName, setJointUnitName] = useState("")
-  const [jointContactPerson, setJointContactPerson] = useState("")
-  const [jointContactPosition, setJointContactPosition] = useState("")
-  const [jointContactPhone, setJointContactPhone] = useState("")
-  const [jointCooperationDesc, setJointCooperationDesc] = useState("")
+  // 各单位计划选派人数（第一行主办单位，其余为参与单位）
+  const [unitDispatchRows, setUnitDispatchRows] = useState([
+    { id: 1, unitName: "", total: "", undergraduate: "", master: "", doctor: "" },
+    { id: 2, unitName: "", total: "", undergraduate: "", master: "", doctor: "" },
+  ])
+
+  const addUnitRow = () => {
+    setUnitDispatchRows((prev) => [
+      ...prev,
+      { id: Date.now(), unitName: "", total: "", undergraduate: "", master: "", doctor: "" },
+    ])
+  }
+
+  const removeUnitRow = (id: number) => {
+    setUnitDispatchRows((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== id) : prev))
+  }
+
+  const updateUnitRow = (id: number, field: string, value: string) => {
+    setUnitDispatchRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
+    )
+  }
+
+  // 项目内容描述（富文本）
+  const [projectContent, setProjectContent] = useState("")
   
   // 经费预算
   const [costPerStudent, setCostPerStudent] = useState("")
@@ -277,7 +307,6 @@ export default function NewProjectApplicationPage() {
                   placeholder="请输入拟选派学生总人数" 
                   value={totalStudents}
                   onChange={(e) => setTotalStudents(e.target.value)}
-                  disabled={studentsUncertain}
                 />
               </div>
 
@@ -291,7 +320,6 @@ export default function NewProjectApplicationPage() {
                         placeholder="本科生人数" 
                         value={undergraduateCount}
                         onChange={(e) => setUndergraduateCount(e.target.value)}
-                        disabled={studentsUncertain}
                       />
                     </div>
                     <div className="space-y-2">
@@ -300,7 +328,6 @@ export default function NewProjectApplicationPage() {
                         placeholder="硕研人数" 
                         value={masterCount}
                         onChange={(e) => setMasterCount(e.target.value)}
-                        disabled={studentsUncertain}
                       />
                     </div>
                     <div className="space-y-2">
@@ -309,23 +336,11 @@ export default function NewProjectApplicationPage() {
                         placeholder="博研人数" 
                         value={doctorCount}
                         onChange={(e) => setDoctorCount(e.target.value)}
-                        disabled={studentsUncertain}
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="uncertain" 
-                  checked={studentsUncertain}
-                  onCheckedChange={(checked) => setStudentsUncertain(checked as boolean)}
-                />
-                <label htmlFor="uncertain" className="text-sm font-medium leading-none">
-                  人数完全不确定（无需填写具体人数）
-                </label>
-              </div>
             </div>
 
             {/* 延续项目关联 */}
@@ -435,53 +450,107 @@ export default function NewProjectApplicationPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-primary">
                       <Building2 className="h-4 w-4" />
-                      <span className="text-sm font-medium">联合申报单位信息填写</span>
+                      <span className="text-sm font-medium">各单位计划选派人数</span>
                     </div>
                     <span className="text-xs text-muted-foreground">必填</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-primary">联合申报单位名称 <span className="text-red-500">*</span></Label>
-                      <Input 
-                        placeholder="请输入联合申报单位全称" 
-                        value={jointUnitName}
-                        onChange={(e) => setJointUnitName(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-primary">单位联系人 <span className="text-red-500">*</span></Label>
-                      <Input 
-                        placeholder="请输入联系人姓名" 
-                        value={jointContactPerson}
-                        onChange={(e) => setJointContactPerson(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-primary">联系人职务 <span className="text-red-500">*</span></Label>
-                      <Input 
-                        placeholder="请输入联系人职务" 
-                        value={jointContactPosition}
-                        onChange={(e) => setJointContactPosition(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-primary">联系电话 <span className="text-red-500">*</span></Label>
-                      <Input 
-                        placeholder="请输入联系电话" 
-                        value={jointContactPhone}
-                        onChange={(e) => setJointContactPhone(e.target.value)}
-                      />
-                    </div>
+                  <div className="overflow-x-auto rounded-md border bg-background">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="border-b border-r p-2 text-center font-medium text-primary min-w-[200px]">
+                            单位名称
+                          </th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">
+                            计划选派总人数
+                          </th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">
+                            计划选派本科生人数
+                          </th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">
+                            计划选派硕研人数
+                          </th>
+                          <th className="border-b border-r p-2 text-center font-medium text-primary">
+                            计划选派博研人数
+                          </th>
+                          <th className="border-b p-2 text-center font-medium text-primary w-16">
+                            操作
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {unitDispatchRows.map((row, index) => (
+                          <tr key={row.id}>
+                            <td className="border-b border-r p-1.5">
+                              <Input
+                                placeholder={index === 0 ? "主办单位名称" : "参与单位名称"}
+                                value={row.unitName}
+                                onChange={(e) => updateUnitRow(row.id, "unitName", e.target.value)}
+                                className="border-0 shadow-none focus-visible:ring-0"
+                              />
+                            </td>
+                            <td className="border-b border-r p-1.5">
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={row.total}
+                                onChange={(e) => updateUnitRow(row.id, "total", e.target.value)}
+                                className="border-0 shadow-none focus-visible:ring-0 text-center"
+                              />
+                            </td>
+                            <td className="border-b border-r p-1.5">
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={row.undergraduate}
+                                onChange={(e) => updateUnitRow(row.id, "undergraduate", e.target.value)}
+                                className="border-0 shadow-none focus-visible:ring-0 text-center"
+                              />
+                            </td>
+                            <td className="border-b border-r p-1.5">
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={row.master}
+                                onChange={(e) => updateUnitRow(row.id, "master", e.target.value)}
+                                className="border-0 shadow-none focus-visible:ring-0 text-center"
+                              />
+                            </td>
+                            <td className="border-b border-r p-1.5">
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={row.doctor}
+                                onChange={(e) => updateUnitRow(row.id, "doctor", e.target.value)}
+                                className="border-0 shadow-none focus-visible:ring-0 text-center"
+                              />
+                            </td>
+                            <td className="border-b p-1.5 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeUnitRow(row.id)}
+                                disabled={unitDispatchRows.length <= 1}
+                                title="删除该行"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="space-y-2 mt-4">
-                    <Label className="text-primary">合作内容/分工说明 <span className="text-red-500">*</span></Label>
-                    <Textarea 
-                      placeholder="请描述合作内容及分工" 
-                      rows={3}
-                      value={jointCooperationDesc}
-                      onChange={(e) => setJointCooperationDesc(e.target.value)}
-                    />
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      注：第一行填写主办单位，其余行填写参与单位
+                    </p>
+                    <Button variant="outline" size="sm" onClick={addUnitRow}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      添加单位
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -538,12 +607,40 @@ export default function NewProjectApplicationPage() {
         </CardContent>
       </Card>
 
-      {/* 模块4：项目完成标准 */}
+      {/* 模块4：项目内容描述 */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
               4
+            </div>
+            <h2 className="text-base font-semibold">项目内容描述</h2>
+          </div>
+          <div className="h-px bg-primary mb-6" />
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-primary">
+              <PenLine className="h-4 w-4" />
+              <Label className="text-foreground font-medium">内容描述</Label>
+            </div>
+            <RichTextEditor
+              value={projectContent}
+              onChange={setProjectContent}
+              minHeight={240}
+              placeholder={
+                "此部分重点填写课程及其他详细安排等描述；若为短期组团学习交流，则需在本栏添加项目计划日程表，在日程表中标红学习课程模块并填写课堂授课学时、时长、师资职称。"
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 模块5：项目完成标准 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+              5
             </div>
             <h2 className="text-base font-semibold">项目完成标准</h2>
           </div>
@@ -553,7 +650,7 @@ export default function NewProjectApplicationPage() {
             <Label className="text-foreground font-medium">完成标准</Label>
             <Textarea 
               placeholder="请明确项目完成的考核标准和指标" 
-              rows={4}
+              rows={10}
               value={completionStandard}
               onChange={(e) => setCompletionStandard(e.target.value)}
             />
@@ -562,12 +659,12 @@ export default function NewProjectApplicationPage() {
         </CardContent>
       </Card>
 
-      {/* 模块5：经费预算 */}
+      {/* 模块6：经费预算 */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-              5
+              6
             </div>
             <h2 className="text-base font-semibold">经费预算、申请单位承诺、意见</h2>
           </div>
