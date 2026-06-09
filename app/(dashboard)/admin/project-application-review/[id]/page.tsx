@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,7 +26,9 @@ import {
   ChevronRight,
   CalendarClock,
   Building2,
-  ClipboardList
+  ClipboardList,
+  Upload,
+  ImageIcon
 } from "lucide-react"
 
 // 模拟项目详情数据
@@ -164,6 +166,33 @@ export default function ProjectApplicationReviewDetailPage() {
   const [maxStudentCount, setMaxStudentCount] = useState("")
   const [reviewRemark, setReviewRemark] = useState("")
   const [selectedAction, setSelectedAction] = useState<"approve" | "reject" | "return" | null>(null)
+
+  // 审核附件（图片）
+  const [attachments, setAttachments] = useState<{ id: string; name: string; url: string }[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    const newAttachments = Array.from(files)
+      .filter((file) => file.type.startsWith("image/"))
+      .map((file) => ({
+        id: `${file.name}-${file.size}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        name: file.name,
+        url: URL.createObjectURL(file),
+      }))
+    setAttachments((prev) => [...prev, ...newAttachments])
+    // 重置 input 以便可重复选择同一文件
+    e.target.value = ""
+  }
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments((prev) => {
+      const target = prev.find((a) => a.id === id)
+      if (target) URL.revokeObjectURL(target.url)
+      return prev.filter((a) => a.id !== id)
+    })
+  }
 
   // 驳回理由弹窗
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
@@ -765,6 +794,58 @@ export default function ProjectApplicationReviewDetailPage() {
                         onChange={(e) => setReviewRemark(e.target.value)}
                         className="bg-background"
                       />
+                    </div>
+
+                    {/* 附件（图片）上传 */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">附件（图片，选填）</p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleFilesSelected}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background py-6 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        <Upload className="h-5 w-5" />
+                        <span className="text-sm">点击上传图片附件</span>
+                        <span className="text-xs text-muted-foreground">支持 JPG、PNG 等图片格式，可多选</span>
+                      </button>
+
+                      {attachments.length > 0 && (
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                          {attachments.map((file) => (
+                            <div
+                              key={file.id}
+                              className="group relative overflow-hidden rounded-lg border bg-background"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={file.url || "/placeholder.svg"}
+                                alt={file.name}
+                                className="h-24 w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveAttachment(file.id)}
+                                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                aria-label={`移除 ${file.name}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              <div className="flex items-center gap-1 px-2 py-1">
+                                <ImageIcon className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                                <span className="truncate text-xs text-muted-foreground">{file.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
