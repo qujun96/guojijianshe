@@ -133,6 +133,79 @@ export default function NewProjectApplicationPage() {
   // 具体安排及进度（富文本）
   const [projectSchedule, setProjectSchedule] = useState("")
 
+  // 申请单位承诺及意见
+  const [commitmentText, setCommitmentText] = useState(
+    "我单位将遵照《重庆大学学生出国（境）交流资助经费管理办法》（重大校发〔2025〕44号）等相关工作文件及学校财务等相关工作制度开展相关工作。我单位将为学生组织行前培训，做好行前培训会议记录并组织学生签署《重庆大学出国（境）学习交流责任书》（可在国际处官网查询模板参考并根据单位具体情况做修改），学生签署完毕后组织在本单位存档。若有违反，本单位将承担相应责任。"
+  )
+
+  // 项目组成员情况（非联合申报）
+  // 主要成员：负责领导、经办联络人
+  const [leadMembers, setLeadMembers] = useState({
+    leader: { name: "", email: "", phone: "" },
+    contact: { name: "", email: "", phone: "" },
+  })
+  const updateLeadMember = (role: "leader" | "contact", field: string, value: string) => {
+    setLeadMembers((prev) => ({ ...prev, [role]: { ...prev[role], [field]: value } }))
+  }
+  // 其他成员（列：姓名、承担工作、工作邮箱、办公室座机及手机）
+  const [otherMembers, setOtherMembers] = useState([
+    { id: 1, name: "", work: "", email: "", phone: "" },
+    { id: 2, name: "", work: "", email: "", phone: "" },
+  ])
+  const addOtherMember = () => {
+    setOtherMembers((prev) => [...prev, { id: Date.now(), name: "", work: "", email: "", phone: "" }])
+  }
+  const removeOtherMember = (id: number) => {
+    setOtherMembers((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== id) : prev))
+  }
+  const updateOtherMember = (id: number, field: string, value: string) => {
+    setOtherMembers((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)))
+  }
+
+  // 项目组成员情况（联合申报）
+  // 每个单位含：单位名称 + 负责领导 + 经办联络人
+  const [unitMembers, setUnitMembers] = useState([
+    {
+      id: 1,
+      unitName: "",
+      leader: { name: "", email: "", phone: "" },
+      contact: { name: "", email: "", phone: "" },
+    },
+    {
+      id: 2,
+      unitName: "",
+      leader: { name: "", email: "", phone: "" },
+      contact: { name: "", email: "", phone: "" },
+    },
+  ])
+  const addUnitMember = () => {
+    setUnitMembers((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        unitName: "",
+        leader: { name: "", email: "", phone: "" },
+        contact: { name: "", email: "", phone: "" },
+      },
+    ])
+  }
+  const removeUnitMember = (id: number) => {
+    setUnitMembers((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== id) : prev))
+  }
+  const updateUnitMemberName = (id: number, value: string) => {
+    setUnitMembers((prev) => prev.map((r) => (r.id === id ? { ...r, unitName: value } : r)))
+  }
+  const updateUnitMemberPerson = (
+    id: number,
+    role: "leader" | "contact",
+    field: string,
+    value: string,
+  ) => {
+    setUnitMembers((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [role]: { ...r[role], [field]: value } } : r)),
+    )
+  }
+
   // 各单位配套经费（联合申报时使用）
   const [fundingUnitRows, setFundingUnitRows] = useState([
     { id: 1, unitName: "", studentCount: "", amountPerStudent: "", amountTotal: "" },
@@ -706,7 +779,7 @@ export default function NewProjectApplicationPage() {
               onChange={setProjectSchedule}
               minHeight={240}
               placeholder={
-                "需填写申报项目全阶段工作内容、分工协作模式、项目准备的时间进度等方面。"
+                "需填写申报项目全阶段工作内容、分工协作模式、项目准备的时间���度等方面。"
               }
             />
           </div>
@@ -1000,46 +1073,254 @@ export default function NewProjectApplicationPage() {
                   <span className="text-sm font-semibold">项目总经费</span>
                   <span className="text-primary font-bold text-lg">¥{totalCost.toLocaleString()}</span>
                 </div>
-
-                <div className="mt-4">
-                  <p className="text-xs text-muted-foreground mb-2">经费来源比例（按公费部分）：</p>
-                  <div className="h-3 rounded-full bg-muted overflow-hidden flex">
-                    <div 
-                      className="h-full bg-primary transition-all" 
-                      style={{ width: `${schoolFundPercent}%` }}
-                    />
-                    <div 
-                      className="h-full bg-green-500 transition-all" 
-                      style={{ width: `${unitFundPercent}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-primary" />
-                      学校经费：{schoolFundPercent}%
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-green-500" />
-                      单位配套：{unitFundPercent}%
-                    </span>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
             {/* 申请单位承诺及意见 */}
             <div className="flex items-center gap-2 text-primary mt-8 mb-4">
               <div className="w-1 h-4 bg-primary rounded" />
-              <span className="text-sm font-medium">（二）申请单位承诺及意见</span>
+              <span className="text-sm font-medium">申请单位承诺及意见</span>
             </div>
             <Card className="bg-muted/30">
               <CardContent className="pt-4">
-                <p className="text-sm leading-relaxed text-foreground text-pretty">
-                  我单位将遵照《重庆大学学生出国（境）交流资助经费管理办法》（重大校发〔2025〕44号）等相关工作文件及学校财务等相关工作制度开展相关工作。我单位将为学生组织行前培训，做好行前培训会议记录并组织学生签署《重庆大学出国（境）学习交流责任书》（可在国际处官网查询模板参考并根据单位具体情况做修改），学生签署完毕后组织在本单位存档。若有违反，本单位将承担相应责任。
-                </p>
+                <Textarea
+                  rows={6}
+                  value={commitmentText}
+                  onChange={(e) => setCommitmentText(e.target.value)}
+                  className="text-sm leading-relaxed bg-background"
+                />
               </CardContent>
             </Card>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 模块8：项目组成员情况 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+              8
+            </div>
+            <h2 className="text-base font-semibold">项目组成员情况</h2>
+          </div>
+          <div className="h-px bg-primary mb-6" />
+
+          {hasJointUnit ? (
+            <div className="space-y-8">
+              {/* 主办单位主要成员 */}
+              <div>
+                <div className="flex items-center gap-2 text-primary mb-3">
+                  <div className="w-1 h-4 bg-primary rounded" />
+                  <span className="text-sm font-medium">主办单位主要成员</span>
+                </div>
+                {unitMembers.length > 0 && (
+                  <UnitMemberTable
+                    member={unitMembers[0]}
+                    onUnitNameChange={(v) => updateUnitMemberName(unitMembers[0].id, v)}
+                    onPersonChange={(role, field, v) =>
+                      updateUnitMemberPerson(unitMembers[0].id, role, field, v)
+                    }
+                  />
+                )}
+              </div>
+
+              {/* 参与单位项目成员 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <div className="w-1 h-4 bg-primary rounded" />
+                    <span className="text-sm font-medium">参与单位项目成员</span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={addUnitMember}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    添加参与单位
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {unitMembers.slice(1).map((member) => (
+                    <div key={member.id} className="relative">
+                      {unitMembers.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeUnitMember(member.id)}
+                          title="删除该单位"
+                          className="absolute -top-2 -right-2 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-red-600"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <UnitMemberTable
+                        member={member}
+                        onUnitNameChange={(v) => updateUnitMemberName(member.id, v)}
+                        onPersonChange={(role, field, v) =>
+                          updateUnitMemberPerson(member.id, role, field, v)
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* 项目组主要成员情况 */}
+              <div>
+                <div className="flex items-center gap-2 text-primary mb-3">
+                  <div className="w-1 h-4 bg-primary rounded" />
+                  <span className="text-sm font-medium">项目组主要成员情况</span>
+                </div>
+                <div className="overflow-x-auto rounded-md border bg-background">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="border-b border-r p-2 text-center font-medium text-primary w-32" />
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+                        <th className="border-b p-2 text-center font-medium text-primary">座机电话及手机电话</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border-b border-r p-2 text-center font-medium text-foreground bg-muted/30">
+                          主要负责领导
+                        </td>
+                        <td className="border-b border-r p-1.5">
+                          <Input
+                            placeholder="姓名"
+                            value={leadMembers.leader.name}
+                            onChange={(e) => updateLeadMember("leader", "name", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                        <td className="border-b border-r p-1.5">
+                          <Input
+                            placeholder="工作邮箱"
+                            value={leadMembers.leader.email}
+                            onChange={(e) => updateLeadMember("leader", "email", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                        <td className="border-b p-1.5">
+                          <Input
+                            placeholder="座机电话及手机电话"
+                            value={leadMembers.leader.phone}
+                            onChange={(e) => updateLeadMember("leader", "phone", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border-r p-2 text-center font-medium text-foreground bg-muted/30">
+                          主要经办及联络人
+                        </td>
+                        <td className="border-r p-1.5">
+                          <Input
+                            placeholder="姓名"
+                            value={leadMembers.contact.name}
+                            onChange={(e) => updateLeadMember("contact", "name", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                        <td className="border-r p-1.5">
+                          <Input
+                            placeholder="工作邮箱"
+                            value={leadMembers.contact.email}
+                            onChange={(e) => updateLeadMember("contact", "email", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                        <td className="p-1.5">
+                          <Input
+                            placeholder="座机电话及手机电话"
+                            value={leadMembers.contact.phone}
+                            onChange={(e) => updateLeadMember("contact", "phone", e.target.value)}
+                            className="border-0 shadow-none focus-visible:ring-0"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 项目其他成员情况 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <div className="w-1 h-4 bg-primary rounded" />
+                    <span className="text-sm font-medium">项目其他成员情况</span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={addOtherMember}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    添加成员
+                  </Button>
+                </div>
+                <div className="overflow-x-auto rounded-md border bg-background">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">承担工作</th>
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+                        <th className="border-b border-r p-2 text-center font-medium text-primary">办公室座机及手机</th>
+                        <th className="border-b p-2 text-center font-medium text-primary w-16">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {otherMembers.map((m) => (
+                        <tr key={m.id}>
+                          <td className="border-b border-r p-1.5">
+                            <Input
+                              placeholder="姓名"
+                              value={m.name}
+                              onChange={(e) => updateOtherMember(m.id, "name", e.target.value)}
+                              className="border-0 shadow-none focus-visible:ring-0"
+                            />
+                          </td>
+                          <td className="border-b border-r p-1.5">
+                            <Input
+                              placeholder="承担工作"
+                              value={m.work}
+                              onChange={(e) => updateOtherMember(m.id, "work", e.target.value)}
+                              className="border-0 shadow-none focus-visible:ring-0"
+                            />
+                          </td>
+                          <td className="border-b border-r p-1.5">
+                            <Input
+                              placeholder="工作邮箱"
+                              value={m.email}
+                              onChange={(e) => updateOtherMember(m.id, "email", e.target.value)}
+                              className="border-0 shadow-none focus-visible:ring-0"
+                            />
+                          </td>
+                          <td className="border-b border-r p-1.5">
+                            <Input
+                              placeholder="办公室座机及手机"
+                              value={m.phone}
+                              onChange={(e) => updateOtherMember(m.id, "phone", e.target.value)}
+                              className="border-0 shadow-none focus-visible:ring-0"
+                            />
+                          </td>
+                          <td className="border-b p-1.5 text-center">
+                            <button
+                              type="button"
+                              onClick={() => removeOtherMember(m.id)}
+                              disabled={otherMembers.length <= 1}
+                              title="删除该行"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
       <div className="fixed bottom-0 left-56 right-0 bg-background border-t p-4 flex justify-end gap-3 z-10">
@@ -1124,6 +1405,113 @@ export default function NewProjectApplicationPage() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+type UnitMemberData = {
+  id: number
+  unitName: string
+  leader: { name: string; email: string; phone: string }
+  contact: { name: string; email: string; phone: string }
+}
+
+function UnitMemberTable({
+  member,
+  onUnitNameChange,
+  onPersonChange,
+}: {
+  member: UnitMemberData
+  onUnitNameChange: (value: string) => void
+  onPersonChange: (role: "leader" | "contact", field: string, value: string) => void
+}) {
+  return (
+    <div className="overflow-x-auto rounded-md border bg-background">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-muted/50">
+            <th className="border-b border-r p-2 text-center font-medium text-primary w-28">单位名称</th>
+            <th className="border-b p-2 text-center font-medium text-primary" colSpan={4}>
+              主要负责人信息
+            </th>
+          </tr>
+          <tr className="bg-muted/50">
+            <th className="border-b border-r p-2" rowSpan={1} />
+            <th className="border-b border-r p-2 text-center font-medium text-primary w-32">类别</th>
+            <th className="border-b border-r p-2 text-center font-medium text-primary">姓名</th>
+            <th className="border-b border-r p-2 text-center font-medium text-primary">工作邮箱</th>
+            <th className="border-b p-2 text-center font-medium text-primary">座机电话及手机电话</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="border-b border-r p-1.5 align-top" rowSpan={2}>
+              <Input
+                placeholder="单位名称"
+                value={member.unitName}
+                onChange={(e) => onUnitNameChange(e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+            <td className="border-b border-r p-2 text-center font-medium text-foreground bg-muted/30">
+              主要负责领导
+            </td>
+            <td className="border-b border-r p-1.5">
+              <Input
+                placeholder="姓名"
+                value={member.leader.name}
+                onChange={(e) => onPersonChange("leader", "name", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+            <td className="border-b border-r p-1.5">
+              <Input
+                placeholder="工作邮箱"
+                value={member.leader.email}
+                onChange={(e) => onPersonChange("leader", "email", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+            <td className="border-b p-1.5">
+              <Input
+                placeholder="座机电话及手机电话"
+                value={member.leader.phone}
+                onChange={(e) => onPersonChange("leader", "phone", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className="border-r p-2 text-center font-medium text-foreground bg-muted/30">
+              主要经办及联络人
+            </td>
+            <td className="border-r p-1.5">
+              <Input
+                placeholder="姓名"
+                value={member.contact.name}
+                onChange={(e) => onPersonChange("contact", "name", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+            <td className="border-r p-1.5">
+              <Input
+                placeholder="工作邮箱"
+                value={member.contact.email}
+                onChange={(e) => onPersonChange("contact", "email", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+            <td className="p-1.5">
+              <Input
+                placeholder="座机电话及手机电话"
+                value={member.contact.phone}
+                onChange={(e) => onPersonChange("contact", "phone", e.target.value)}
+                className="border-0 shadow-none focus-visible:ring-0"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
 }
