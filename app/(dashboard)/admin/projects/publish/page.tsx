@@ -429,7 +429,8 @@ export default function ProjectPublishPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="department">处部/学院级项目</SelectItem>
-                          <SelectItem value="national">国家/校级项目</SelectItem>
+                          <SelectItem value="school">校级项目</SelectItem>
+                          <SelectItem value="national">国家级项目</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -691,11 +692,16 @@ export default function ProjectPublishPage() {
                 </section>
 
                 <section className="space-y-4">
-                  <h2 className="font-medium text-sm text-muted-foreground">地理位置与学校</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-medium text-sm text-muted-foreground">地理位置与学校</h2>
+                    {projectLevel === "national" && (
+                      <Badge variant="outline" className="text-xs">选填</Badge>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 所在大洲
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 所在大洲
                       </Label>
                       <Select value={continent} onValueChange={setContinent}>
                         <SelectTrigger>
@@ -713,7 +719,7 @@ export default function ProjectPublishPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 国家/地区
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 国家/地区
                       </Label>
                       <Select value={country} onValueChange={setCountry}>
                         <SelectTrigger>
@@ -730,7 +736,7 @@ export default function ProjectPublishPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 学校/组织
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 学校/组织
                       </Label>
                       <Select value={organization} onValueChange={setOrganization}>
                         <SelectTrigger>
@@ -1016,7 +1022,7 @@ export default function ProjectPublishPage() {
                     </div>
                     
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">规则类型：</span>{ruleType === "filter" ? "筛选规则（通过/不通过）" : "评分规则（计算分数）"}</p>
+                      <p><span className="font-medium">规则类型：</span>{ruleType === "filter" ? "筛选规则（通过/不通过）" : "评分��则（计算分数）"}</p>
                       <p><span className="font-medium">应用范围：</span>所有申请学生</p>
                       <p><span className="font-medium">判断条件：</span>{generateRulePreview()}</p>
                       {ruleType === "score" && <p><span className="font-medium">规则权重：</span>{ruleWeight[0]}%</p>}
