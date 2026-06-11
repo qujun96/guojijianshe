@@ -124,6 +124,9 @@ export default function DispatchConfirmPage() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isBatchConfirmDialogOpen, setIsBatchConfirmDialogOpen] = useState(false)
   const [isNotifyDialogOpen, setIsNotifyDialogOpen] = useState(false)
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
+  const [transferLeader, setTransferLeader] = useState("")
   const [currentStudent, setCurrentStudent] = useState<typeof dispatchStudents[0] | null>(null)
 
   const filteredStudents = dispatchStudents.filter(student => {
@@ -162,6 +165,17 @@ export default function DispatchConfirmPage() {
     setIsNotifyDialogOpen(true)
   }
 
+  const handleReturn = (student: typeof dispatchStudents[0]) => {
+    setCurrentStudent(student)
+    setIsReturnDialogOpen(true)
+  }
+
+  const handleTransfer = (student: typeof dispatchStudents[0]) => {
+    setCurrentStudent(student)
+    setTransferLeader("")
+    setIsTransferDialogOpen(true)
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "待确认":
@@ -181,8 +195,7 @@ export default function DispatchConfirmPage() {
         {/* Tab Buttons */}
         <div className="flex gap-2">
           <Button 
-            variant={tab === "pending" ? "outline" : "ghost"}
-            className={tab === "pending" ? "border-primary text-primary" : ""}
+            variant={tab === "pending" ? "default" : "ghost"}
             onClick={() => setTab("pending")}
           >
             待确认
@@ -254,10 +267,6 @@ export default function DispatchConfirmPage() {
               </div>
               {tab === "pending" && selectedStudents.length > 0 && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-2" onClick={handleNotify}>
-                    <Send className="h-4 w-4" />
-                    批量通知
-                  </Button>
                   <Button size="sm" className="gap-2" onClick={handleBatchConfirm}>
                     <CheckCircle2 className="h-4 w-4" />
                     批量确认派出
@@ -339,6 +348,22 @@ export default function DispatchConfirmPage() {
                               onClick={() => handleConfirm(student)}
                             >
                               确认派出
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 text-amber-600"
+                              onClick={() => handleReturn(student)}
+                            >
+                              退回修改信息
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 text-blue-600"
+                              onClick={() => handleTransfer(student)}
+                            >
+                              转领导
                             </Button>
                             <Button variant="ghost" size="sm" className="h-7 text-muted-foreground">
                               通知
@@ -556,6 +581,101 @@ export default function DispatchConfirmPage() {
             <Button onClick={() => setIsNotifyDialogOpen(false)} className="gap-2">
               <Send className="h-4 w-4" />
               发送通知
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Return Dialog */}
+      <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>退回修改信息</DialogTitle>
+            <DialogDescription>
+              将 {currentStudent?.studentName} 的派出信息退回，由学生修改后重新提交确认
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">学生姓名</span>
+                <span className="font-medium">{currentStudent?.studentName}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">项目名称</span>
+                <span className="font-medium">{currentStudent?.projectName}</span>
+              </div>
+            </div>
+            <div>
+              <Label>退回原因<span className="text-destructive"> *</span></Label>
+              <Textarea 
+                placeholder="请说明需要修改的内容及原因，便于学生准确修改" 
+                className="mt-2"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReturnDialogOpen(false)}>取消</Button>
+            <Button variant="destructive" onClick={() => setIsReturnDialogOpen(false)} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              确认退回
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>转领导</DialogTitle>
+            <DialogDescription>
+              将 {currentStudent?.studentName} 的派出确认转交给领导审批
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">学生姓名</span>
+                <span className="font-medium">{currentStudent?.studentName}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">目标院校</span>
+                <span className="font-medium">{currentStudent?.targetSchool}</span>
+              </div>
+            </div>
+            <div>
+              <Label>转交领导<span className="text-destructive"> *</span></Label>
+              <Select value={transferLeader} onValueChange={setTransferLeader}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="请选择转交的领导" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="zhang">张处长 - 国际交流处</SelectItem>
+                  <SelectItem value="li">李副处长 - 国际交流处</SelectItem>
+                  <SelectItem value="wang">王主任 - 学院分管领导</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>转交说明</Label>
+              <Textarea 
+                placeholder="请输入转交说明（可选）" 
+                className="mt-2"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTransferDialogOpen(false)}>取消</Button>
+            <Button 
+              disabled={!transferLeader}
+              onClick={() => setIsTransferDialogOpen(false)} 
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              确认转交
             </Button>
           </DialogFooter>
         </DialogContent>
