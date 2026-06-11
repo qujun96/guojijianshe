@@ -127,12 +127,12 @@ export default function DispatchConfirmPage() {
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
   const [transferLeader, setTransferLeader] = useState("")
+  const [isBatchMode, setIsBatchMode] = useState(false)
   const [currentStudent, setCurrentStudent] = useState<typeof dispatchStudents[0] | null>(null)
 
   const filteredStudents = dispatchStudents.filter(student => {
     if (tab === "pending") return student.confirmStatus === "待确认"
     if (tab === "confirmed") return student.confirmStatus === "已确认"
-    if (tab === "abandoned") return student.confirmStatus === "已放弃"
     return true
   })
 
@@ -167,11 +167,26 @@ export default function DispatchConfirmPage() {
 
   const handleReturn = (student: typeof dispatchStudents[0]) => {
     setCurrentStudent(student)
+    setIsBatchMode(false)
     setIsReturnDialogOpen(true)
   }
 
   const handleTransfer = (student: typeof dispatchStudents[0]) => {
     setCurrentStudent(student)
+    setIsBatchMode(false)
+    setTransferLeader("")
+    setIsTransferDialogOpen(true)
+  }
+
+  const handleBatchReturn = () => {
+    setCurrentStudent(null)
+    setIsBatchMode(true)
+    setIsReturnDialogOpen(true)
+  }
+
+  const handleBatchTransfer = () => {
+    setCurrentStudent(null)
+    setIsBatchMode(true)
     setTransferLeader("")
     setIsTransferDialogOpen(true)
   }
@@ -210,15 +225,6 @@ export default function DispatchConfirmPage() {
             已确认
             <Badge variant="secondary" className="ml-2">
               {dispatchStudents.filter(s => s.confirmStatus === "已确认").length}
-            </Badge>
-          </Button>
-          <Button 
-            variant={tab === "abandoned" ? "default" : "ghost"}
-            onClick={() => setTab("abandoned")}
-          >
-            已放弃
-            <Badge variant="secondary" className="ml-2">
-              {dispatchStudents.filter(s => s.confirmStatus === "已放弃").length}
             </Badge>
           </Button>
         </div>
@@ -270,6 +276,14 @@ export default function DispatchConfirmPage() {
                   <Button size="sm" className="gap-2" onClick={handleBatchConfirm}>
                     <CheckCircle2 className="h-4 w-4" />
                     批量确认派出
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 text-amber-600" onClick={handleBatchReturn}>
+                    <RotateCcw className="h-4 w-4" />
+                    批量退回修改信息
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 text-blue-600" onClick={handleBatchTransfer}>
+                    <Send className="h-4 w-4" />
+                    批量转领导
                   </Button>
                 </div>
               )}
@@ -364,9 +378,6 @@ export default function DispatchConfirmPage() {
                               onClick={() => handleTransfer(student)}
                             >
                               转领导
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-muted-foreground">
-                              通知
                             </Button>
                           </>
                         )}
@@ -590,21 +601,32 @@ export default function DispatchConfirmPage() {
       <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>退回修改信息</DialogTitle>
+            <DialogTitle>{isBatchMode ? "批量退回修改信息" : "退回修改信息"}</DialogTitle>
             <DialogDescription>
-              将 {currentStudent?.studentName} 的派出信息退回，由学生修改后重新提交确认
+              {isBatchMode
+                ? `将所选 ${selectedStudents.length} 名学生的派出信息退回，由学生修改后重新提交确认`
+                : `将 ${currentStudent?.studentName} 的派出信息退回，由学生修改后重新提交确认`}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="p-4 bg-muted rounded-lg space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">学生姓名</span>
-                <span className="font-medium">{currentStudent?.studentName}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">项目名称</span>
-                <span className="font-medium">{currentStudent?.projectName}</span>
-              </div>
+              {isBatchMode ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">退回学生</span>
+                  <span className="font-medium">共 {selectedStudents.length} 名</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">学生姓名</span>
+                    <span className="font-medium">{currentStudent?.studentName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">项目名称</span>
+                    <span className="font-medium">{currentStudent?.projectName}</span>
+                  </div>
+                </>
+              )}
             </div>
             <div>
               <Label>退回原因<span className="text-destructive"> *</span></Label>
@@ -629,21 +651,32 @@ export default function DispatchConfirmPage() {
       <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>转领导</DialogTitle>
+            <DialogTitle>{isBatchMode ? "批量转领导" : "转领导"}</DialogTitle>
             <DialogDescription>
-              将 {currentStudent?.studentName} 的派出确认转交给领导审批
+              {isBatchMode
+                ? `将所选 ${selectedStudents.length} 名学生的派出确认转交给领导审批`
+                : `将 ${currentStudent?.studentName} 的派出确认转交给领导审批`}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="p-4 bg-muted rounded-lg space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">学生姓名</span>
-                <span className="font-medium">{currentStudent?.studentName}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">目标院校</span>
-                <span className="font-medium">{currentStudent?.targetSchool}</span>
-              </div>
+              {isBatchMode ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">转交学生</span>
+                  <span className="font-medium">共 {selectedStudents.length} 名</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">学生姓名</span>
+                    <span className="font-medium">{currentStudent?.studentName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">目标院校</span>
+                    <span className="font-medium">{currentStudent?.targetSchool}</span>
+                  </div>
+                </>
+              )}
             </div>
             <div>
               <Label>转交领导<span className="text-destructive"> *</span></Label>
