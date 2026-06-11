@@ -817,7 +817,7 @@ export default function ProjectPublishPage() {
                     <Cog className="h-4 w-4 text-primary" />
                     <h2 className="font-medium">派出流程配置</h2>
                     <span className="text-xs text-muted-foreground">
-                      配置学生在【派出准备】及派出中需提交的内容
+                      配置学生在派出前及派出中需提交的内容
                     </span>
                   </div>
 
@@ -1040,7 +1040,7 @@ export default function ProjectPublishPage() {
                 <section className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Cog className="h-4 w-4 text-primary" />
-                    <h2 className="font-medium">规则条件配置</h2>
+                    <h2 className="font-medium">规���条件配置</h2>
                     <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">核心部分</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">配置审核规则条件，数据来源于学生申请时填写提交的信息。AND表示必须同时满足，OR表示满足其一即可。</p>
