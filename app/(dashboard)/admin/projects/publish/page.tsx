@@ -19,9 +19,12 @@ import {
 } from "@/components/ui/select"
 import { AIAssistantPanel } from "@/components/ai/ai-assistant-panel"
 import { AIPolishButton } from "@/components/ai/ai-polish-panel"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import { 
   ArrowLeft, Calendar, Sparkles, FileText, Settings, CheckCircle2, 
-  ChevronRight, ChevronLeft, Plus, X, Eye, Cog, Search, Users, Building2
+  ChevronRight, ChevronLeft, Plus, X, Eye, Cog, Search, Users, Building2,
+  ClipboardList, Plane, BookOpen, ShieldCheck, CalendarClock
 } from "lucide-react"
 import {
   Dialog,
@@ -160,6 +163,37 @@ interface RuleCondition {
   value: string
 }
 
+// ============ 派出流程配置选项 ============
+// 派出前 - 离校手续办理项
+const departureProcedureOptions = [
+  { value: "project_approval", label: "项目申请审批" },
+  { value: "mentor_sign", label: "辅导员/导师签字确认" },
+  { value: "status_change", label: "学籍异动办理" },
+  { value: "party_relation", label: "学院党/团支部关系办理" },
+  { value: "finance_settle", label: "财务结算确认" },
+  { value: "library_clear", label: "图书馆结清" },
+  { value: "dorm_service", label: "学生公寓服务办理" },
+]
+
+// 派出前 - 派出材料准备项
+const departureMaterialOptions = [
+  { value: "admission", label: "国(境)外录取通知书" },
+  { value: "visa", label: "签证材料" },
+  { value: "insurance", label: "境外保险证明" },
+  { value: "consent_letter", label: "定向学生同意派出函" },
+  { value: "safety_commitment", label: "安全责任书" },
+  { value: "emergency_contact", label: "紧急联系人确认书" },
+  { value: "itinerary", label: "行程信息" },
+]
+
+// 派出中 - 报告/汇报频率选项
+const reportFrequencyOptions = [
+  { value: "weekly", label: "每周一次" },
+  { value: "biweekly", label: "每两周一次" },
+  { value: "monthly", label: "每月一次" },
+  { value: "quarterly", label: "每季度一次" },
+]
+
 export default function ProjectPublishPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
@@ -179,6 +213,30 @@ export default function ProjectPublishPage() {
   const [country, setCountry] = useState("") // 国家/地区
   const [organization, setOrganization] = useState("") // 学校/组织
   const [materialDeadline, setMaterialDeadline] = useState("")
+
+  // 派出流程配置 - 派出前
+  const [selectedProcedures, setSelectedProcedures] = useState<string[]>(
+    departureProcedureOptions.map((o) => o.value)
+  )
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(
+    departureMaterialOptions.map((o) => o.value)
+  )
+  // 派出流程配置 - 派出中
+  const [requireLearningReport, setRequireLearningReport] = useState(true)
+  const [learningReportFrequency, setLearningReportFrequency] = useState("monthly")
+  const [requireSafetyReport, setRequireSafetyReport] = useState(true)
+  const [safetyReportFrequency, setSafetyReportFrequency] = useState("weekly")
+
+  const toggleProcedure = (value: string) => {
+    setSelectedProcedures((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+  const toggleMaterial = (value: string) => {
+    setSelectedMaterials((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
   
   // 时间安排
   const [startDate, setStartDate] = useState("")
@@ -751,6 +809,175 @@ export default function ProjectPublishPage() {
                       </Select>
                     </div>
                   </div>
+                </section>
+
+                {/* 派出流程配置 */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Cog className="h-4 w-4 text-primary" />
+                    <h2 className="font-medium">派出流程配置</h2>
+                    <span className="text-xs text-muted-foreground">
+                      配置学生在【派出准备】及派出中需提交的内容
+                    </span>
+                  </div>
+
+                  {/* 派出前阶段 */}
+                  <Card>
+                    <CardContent className="p-5 space-y-5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100">
+                          <Plane className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <h3 className="font-medium text-sm">派出前阶段</h3>
+                        <Badge variant="outline" className="text-xs">派出准备</Badge>
+                      </div>
+
+                      {/* 离校手续办理 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <ClipboardList className="h-4 w-4" />
+                          离校手续办理
+                          <span className="text-xs font-normal">
+                            （已选 {selectedProcedures.length}/{departureProcedureOptions.length}）
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {departureProcedureOptions.map((opt) => {
+                            const checked = selectedProcedures.includes(opt.value)
+                            return (
+                              <label
+                                key={opt.value}
+                                className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                                  checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                }`}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => toggleProcedure(opt.value)}
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 派出材料准备 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <FileText className="h-4 w-4" />
+                          派出材料准备
+                          <span className="text-xs font-normal">
+                            （已选 {selectedMaterials.length}/{departureMaterialOptions.length}）
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {departureMaterialOptions.map((opt) => {
+                            const checked = selectedMaterials.includes(opt.value)
+                            return (
+                              <label
+                                key={opt.value}
+                                className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                                  checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                }`}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => toggleMaterial(opt.value)}
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 派出中阶段 */}
+                  <Card>
+                    <CardContent className="p-5 space-y-5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100">
+                          <CalendarClock className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <h3 className="font-medium text-sm">派出中阶段</h3>
+                        <Badge variant="outline" className="text-xs">在外期间</Badge>
+                      </div>
+
+                      {/* 学习报告 */}
+                      <div className="rounded-lg border p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">学生需提交学习报告</span>
+                          </div>
+                          <Switch
+                            checked={requireLearningReport}
+                            onCheckedChange={setRequireLearningReport}
+                          />
+                        </div>
+                        {requireLearningReport && (
+                          <div className="flex items-center gap-3 pl-6">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">
+                              提交频率
+                            </Label>
+                            <Select
+                              value={learningReportFrequency}
+                              onValueChange={setLearningReportFrequency}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="请选择提交频率" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {reportFrequencyOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 安全汇报 */}
+                      <div className="rounded-lg border p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">学生需进行安全汇报</span>
+                          </div>
+                          <Switch
+                            checked={requireSafetyReport}
+                            onCheckedChange={setRequireSafetyReport}
+                          />
+                        </div>
+                        {requireSafetyReport && (
+                          <div className="flex items-center gap-3 pl-6">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">
+                              汇报频率
+                            </Label>
+                            <Select
+                              value={safetyReportFrequency}
+                              onValueChange={setSafetyReportFrequency}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="请选择汇报频率" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {reportFrequencyOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </section>
 
                 <div className="flex justify-center gap-4 pt-4 border-t">
