@@ -35,10 +35,10 @@ const overseasRecords = [
     studentName: "张五",
     studentId: "2022010001",
     department: "计算机学院",
-    projectName: "2026年《中美人才培养计划》1+2+1双学位项目",
-    targetCountry: "美国",
+    projectName: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    targetCountry: "A国",
     targetCity: "特洛伊市",
-    targetSchool: "美国特洛伊大学",
+    targetSchool: "A国某大学",
     arrivalDate: "2026-09-01",
     overseasPhone: "+1 334-123-4567",
     overseasEmail: "zhangwu@troy.edu",
@@ -53,10 +53,10 @@ const overseasRecords = [
     studentName: "李明",
     studentId: "2022010002",
     department: "外国语学院",
-    projectName: "剑桥大学2026寒假短期课程项目",
-    targetCountry: "英国",
-    targetCity: "剑桥",
-    targetSchool: "剑桥大学",
+    projectName: "G国H大学2026寒假短期课程项目",
+    targetCountry: "G国",
+    targetCity: "H市",
+    targetSchool: "G国H大学",
     arrivalDate: "2026-07-16",
     overseasPhone: "+44 7123456789",
     overseasEmail: "liming@cam.ac.uk",
@@ -71,10 +71,10 @@ const overseasRecords = [
     studentName: "王芳",
     studentId: "2022010003",
     department: "管理学院",
-    projectName: "布里斯托3+1本硕连读",
-    targetCountry: "英国",
-    targetCity: "布里斯托",
-    targetSchool: "布里斯托大学",
+    projectName: "E国F大学3+1本硕连读",
+    targetCountry: "G国",
+    targetCity: "F市",
+    targetSchool: "E国F大学",
     arrivalDate: null,
     overseasPhone: null,
     overseasEmail: null,
@@ -114,10 +114,10 @@ export default function OverseasStatusAdminPage() {
                   <SelectValue placeholder="目的国家" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="us">美国</SelectItem>
-                  <SelectItem value="uk">英国</SelectItem>
-                  <SelectItem value="de">德国</SelectItem>
-                  <SelectItem value="jp">日本</SelectItem>
+                  <SelectItem value="a-country">A国</SelectItem>
+                  <SelectItem value="g-country">G国</SelectItem>
+                  <SelectItem value="k-country">K国</SelectItem>
+                  <SelectItem value="c-country">C国</SelectItem>
                 </SelectContent>
               </Select>
               <Select>
@@ -244,11 +244,11 @@ export default function OverseasStatusAdminPage() {
           <h4 className="text-sm font-medium">目的地分布</h4>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm p-2 bg-muted rounded">
-              <span>美国</span>
+              <span>A国</span>
               <span className="font-medium">1人</span>
             </div>
             <div className="flex items-center justify-between text-sm p-2 bg-muted rounded">
-              <span>英国</span>
+              <span>G国</span>
               <span className="font-medium">2人</span>
             </div>
           </div>

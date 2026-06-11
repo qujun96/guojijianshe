@@ -37,8 +37,8 @@ const myTasks = [
 
 // 近期项目动态
 const recentActivities = [
-  { time: "10分钟前", content: "王家瑞提交了(亚洲地区)交换生项目申请", type: "apply" },
-  { time: "30分钟前", content: "剑桥大学2026寒假项目新增2名报名学生", type: "register" },
+  { time: "10分钟前", content: "王家瑞提交了C国交换生项目申请", type: "apply" },
+  { time: "30分钟前", content: "G国H大学2026寒假项目新增2名报名学生", type: "register" },
   { time: "1小时前", content: "李明的派出材料已通过审核", type: "approve" },
   { time: "2小时前", content: "张三提交了3月学习报告", type: "report" },
 ]

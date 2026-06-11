@@ -31,7 +31,7 @@ const recentApprovals = [
     id: 1, 
     studentName: "张三", 
     type: "申请审核",
-    project: "韩国忠南大学交换项目",
+    project: "A国B大学交换项目",
     status: "approved",
     time: "10分钟前"
   },
@@ -39,7 +39,7 @@ const recentApprovals = [
     id: 2, 
     studentName: "李四", 
     type: "材料审核",
-    project: "日本早稻田大学暑期项目",
+    project: "C国T大学暑期项目",
     status: "rejected",
     time: "1小时前"
   },
@@ -47,7 +47,7 @@ const recentApprovals = [
     id: 3, 
     studentName: "王五", 
     type: "学分审核",
-    project: "美国UCLA交换项目",
+    project: "A国某大学交换项目",
     status: "approved",
     time: "2小时前"
   },

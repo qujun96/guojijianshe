@@ -51,7 +51,7 @@ const reports = [
     studentId: "2021001001",
     college: "美视电影学院",
     project: "（亚洲地区）2026年秋季学期第三批交换生项目",
-    school: "韩国汉阳大学",
+    school: "A国D大学",
     month: "2026年3月",
     submitTime: "2026-03-28 14:30",
     status: "已提交",
@@ -64,8 +64,8 @@ const reports = [
     studentName: "李明远",
     studentId: "2021002015",
     college: "计算机学院",
-    project: "2026年《中美人才培养计划》1+2+1双学位项目",
-    school: "美国加州大学",
+    project: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    school: "A国某大学",
     month: "2026年3月",
     submitTime: "2026-03-25 09:15",
     status: "已提交",
@@ -79,7 +79,7 @@ const reports = [
     studentId: "2021003022",
     college: "外国语学院",
     project: "（欧洲地区）2026年春季学期交换生项目",
-    school: "法国巴黎大学",
+    school: "F国某大学",
     month: "2026年3月",
     submitTime: "2026-03-30 16:45",
     status: "已提交",
@@ -92,8 +92,8 @@ const reports = [
     studentName: "陈浩然",
     studentId: "2021004008",
     college: "经济管理学院",
-    project: "2026年英国剑桥大学暑期课程项目",
-    school: "英国剑桥大学",
+    project: "2026年G国H大学暑期课程项目",
+    school: "G国H大学",
     month: "2026年2月",
     submitTime: "2026-02-28 11:20",
     status: "已提交",
@@ -107,7 +107,7 @@ const reports = [
     studentId: "2021005019",
     college: "艺术学院",
     project: "（亚洲地区）2026年秋季学期第三批交换生项目",
-    school: "日本东京艺术大学",
+    school: "C国艺术大学",
     month: "2026年3月",
     submitTime: "",
     status: "未提交",
@@ -122,7 +122,7 @@ const sampleReportContent = `
 
 ## 一、学习情况
 
-本月我在韩国汉阳大学继续深入学习传媒相关课程。主要修读了《跨文化传播学》和《数字媒体制作》两门核心课程。
+本月我在A国D大学继续深入学习传媒相关课程。主要修读了《跨文化传播学》和《数字媒体制作》两门核心课程。
 
 在《跨文化传播学》课程中，我们深入探讨了不同文化背景下的信息传播方式和规律。通过与来自世界各地的同学进行小组讨论和案例分析，我对东西方媒体报道的差异有了更深刻的理解。
 
@@ -132,7 +132,7 @@ const sampleReportContent = `
 
 ## 三、文化体验
 
-本月参加了学校组织的韩国传统文化体验活动，学习了韩服礼仪和传统茶道。这些活动让我更好地融入当地生活，也为我的跨文化研究提供了一手素材。
+本月参加了学校组织的A国传统文化体验活动，学习了传统礼仪和传统茶道。这些活动让我更好地融入当地生活，也为我的跨文化研究提供了一手素材。
 
 ## 四、下月计划
 
@@ -252,7 +252,7 @@ export default function ReportsViewPage() {
                   <SelectItem value="all">全部项目</SelectItem>
                   <SelectItem value="asia">亚洲地区交换生项目</SelectItem>
                   <SelectItem value="europe">欧洲地区交换生项目</SelectItem>
-                  <SelectItem value="america">中美人才培养计划</SelectItem>
+                  <SelectItem value="america">A国B国人才培养计划</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -449,12 +449,12 @@ export default function ReportsViewPage() {
           <CardContent className="space-y-3">
             <div className="p-2 bg-muted/50 rounded-lg">
               <p className="text-sm font-medium">张晓梅</p>
-              <p className="text-xs text-muted-foreground">法国巴黎大学 · 92分</p>
+              <p className="text-xs text-muted-foreground">F国某大学 · 92分</p>
               <p className="text-xs text-primary mt-1">内容丰富，结构清晰，有深度思考</p>
             </div>
             <div className="p-2 bg-muted/50 rounded-lg">
               <p className="text-sm font-medium">王家瑶</p>
-              <p className="text-xs text-muted-foreground">韩国汉阳大学 · 88分</p>
+              <p className="text-xs text-muted-foreground">A国D大学 · 88分</p>
               <p className="text-xs text-primary mt-1">学习计划明确，执行力强</p>
             </div>
           </CardContent>

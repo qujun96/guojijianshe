@@ -74,7 +74,7 @@ export default function ArchivePage() {
               <div className="grid grid-cols-2 gap-4 text-left">
                 <div>
                   <div className="text-sm text-muted-foreground">项目名称</div>
-                  <div className="font-medium">中美人才培养计划</div>
+                  <div className="font-medium">A国B国人才培养计划</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">留学时长</div>

@@ -34,6 +34,17 @@ import {
   LogIn,
   ArrowRightLeft,
   Archive,
+  Shield,
+  Users,
+  KeyRound,
+  Network,
+  BookMarked,
+  ScrollText,
+  History,
+  Cog,
+  Bell,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react"
 
 interface MenuItemType {
@@ -68,6 +79,8 @@ const menuItems: MenuItemType[] = [
     icon: <FolderOpen className="h-4 w-4" />,
     children: [
       { label: "项目发布查询", href: "/admin/projects", icon: <FileText className="h-4 w-4" /> },
+      { label: "项目立项申报", href: "/admin/project-application", icon: <FileSignature className="h-4 w-4" /> },
+      { label: "立项申报审核", href: "/admin/project-application-review", icon: <ClipboardCheck className="h-4 w-4" /> },
       { label: "项目类型管理", href: "/admin/project-types", icon: <Settings className="h-4 w-4" /> },
       { label: "学校/组织管理", href: "/admin/organizations", icon: <Building2 className="h-4 w-4" /> },
       { label: "规则模板管理", href: "/admin/rule-templates", icon: <ClipboardList className="h-4 w-4" /> },
@@ -85,7 +98,8 @@ const menuItems: MenuItemType[] = [
       { label: "参与项目查询", href: "/student/my-projects", icon: <FolderOpen className="h-4 w-4" /> },
       { label: "申请审核", href: "/admin/review", icon: <ClipboardCheck className="h-4 w-4" /> },
       { label: "外派确认", href: "/admin/dispatch-confirm", icon: <UserCheck className="h-4 w-4" /> },
-      { label: "离校任务清单", href: "/student/departure-tasks", icon: <ClipboardList className="h-4 w-4" /> },
+      { label: "派出准备", href: "/student/departure-tasks", icon: <ClipboardList className="h-4 w-4" /> },
+      { label: "派出准备审核", href: "/admin/dispatch-review", icon: <ClipboardCheck className="h-4 w-4" /> },
       { label: "学籍异动办理", href: "/student/enrollment-change", icon: <UserCog className="h-4 w-4" /> },
       { label: "学籍异动审核", href: "/admin/enrollment-review", icon: <ClipboardCheck className="h-4 w-4" /> },
     ],
@@ -97,12 +111,12 @@ const menuItems: MenuItemType[] = [
     badge: "阶段2",
     badgeColor: "bg-amber-500",
     children: [
-      { label: "派出材料提交", href: "/student/dispatch-materials", icon: <FileText className="h-4 w-4" /> },
       { label: "在外情况填写", href: "/student/overseas-status", icon: <MapPin className="h-4 w-4" /> },
       { label: "学习报告提交", href: "/student/learning-reports", icon: <BookOpen className="h-4 w-4" /> },
-      { label: "派出材料审核", href: "/admin/dispatch-review", icon: <ClipboardCheck className="h-4 w-4" /> },
+      { label: "安全汇报", href: "/student/safety-report", icon: <ShieldCheck className="h-4 w-4" /> },
       { label: "在外情况查看", href: "/admin/overseas-status", icon: <Globe className="h-4 w-4" /> },
       { label: "学习报告查看", href: "/admin/reports-view", icon: <Eye className="h-4 w-4" /> },
+      { label: "安全汇报查看", href: "/admin/safety-report-view", icon: <ShieldAlert className="h-4 w-4" /> },
     ],
   },
   // 派出后阶段
@@ -121,6 +135,21 @@ const menuItems: MenuItemType[] = [
       { label: "学籍恢复审核", href: "/admin/restore-review", icon: <RefreshCcw className="h-4 w-4" /> },
       { label: "成绩与学分审核", href: "/admin/grades-credit-review", icon: <GraduationCap className="h-4 w-4" /> },
       { label: "归档材料管理", href: "/admin/archive-manage", icon: <FolderOpen className="h-4 w-4" /> },
+    ],
+  },
+  // 系统管理
+  {
+    label: "系统管理",
+    icon: <Shield className="h-4 w-4" />,
+    children: [
+      { label: "用户管理", href: "/system/users", icon: <Users className="h-4 w-4" /> },
+      { label: "角色权限管理", href: "/system/roles", icon: <KeyRound className="h-4 w-4" /> },
+      { label: "部门管理", href: "/system/departments", icon: <Network className="h-4 w-4" /> },
+      { label: "数据字典", href: "/system/dictionary", icon: <BookMarked className="h-4 w-4" /> },
+      { label: "登录日志", href: "/system/login-logs", icon: <LogIn className="h-4 w-4" /> },
+      { label: "操作日志", href: "/system/operation-logs", icon: <History className="h-4 w-4" /> },
+      { label: "系统配置", href: "/system/settings", icon: <Cog className="h-4 w-4" /> },
+      { label: "通知公告", href: "/system/notices", icon: <Bell className="h-4 w-4" /> },
     ],
   },
 ]

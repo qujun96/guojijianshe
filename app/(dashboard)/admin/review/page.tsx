@@ -41,7 +41,7 @@ const applications = [
   },
   {
     id: 2,
-    studentName: "东京全",
+    studentName: "王小明",
     department: "美视电影学院",
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "国际竞赛",
@@ -52,7 +52,7 @@ const applications = [
   },
   {
     id: 3,
-    studentName: "布里斯托",
+    studentName: "F市",
     department: "美视电影学院",
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
     projectType: "交换生项目",

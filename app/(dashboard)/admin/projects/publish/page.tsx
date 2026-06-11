@@ -19,10 +19,67 @@ import {
 } from "@/components/ui/select"
 import { AIAssistantPanel } from "@/components/ai/ai-assistant-panel"
 import { AIPolishButton } from "@/components/ai/ai-polish-panel"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import { 
   ArrowLeft, Calendar, Sparkles, FileText, Settings, CheckCircle2, 
-  ChevronRight, ChevronLeft, Plus, X, Eye, Cog
+  ChevronRight, ChevronLeft, Plus, X, Eye, Cog, Search, Users, Building2,
+  ClipboardList, Plane, BookOpen, ShieldCheck, CalendarClock
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+// 已通过审核的立项申报项目（模拟数据）
+const approvedApplications = [
+  {
+    id: "PA202403001",
+    projectName: "G国H大学工程学暑期交流项目",
+    applyUnit: "电气工程学院",
+    applicant: "张伟教授",
+    applyTime: "2024-03-15",
+    startDate: "2024-07-01",
+    endDate: "2024-07-30",
+    totalStudents: 30,
+    totalCost: 975000,
+  },
+  {
+    id: "PA202403002",
+    projectName: "G国I大学人工智能研修班",
+    applyUnit: "信息工程学院",
+    applicant: "陈明教授",
+    applyTime: "2024-03-14",
+    startDate: "2024-08-01",
+    endDate: "2024-08-25",
+    totalStudents: 25,
+    totalCost: 850000,
+  },
+  {
+    id: "PA202403003",
+    projectName: "A国J大学经济管理项目",
+    applyUnit: "管理学院",
+    applicant: "刘芳副教授",
+    applyTime: "2024-03-13",
+    startDate: "2024-07-15",
+    endDate: "2024-08-15",
+    totalStudents: 20,
+    totalCost: 720000,
+  },
+  {
+    id: "PA202403004",
+    projectName: "K国L大学交换项目",
+    applyUnit: "机械工程学院",
+    applicant: "王磊教授",
+    applyTime: "2024-03-12",
+    startDate: "2024-09-01",
+    endDate: "2024-12-31",
+    totalStudents: 15,
+    totalCost: 580000,
+  },
+]
 
 // 判断字段选项（来源于学生申请时填写的信息）
 const fieldOptions = [
@@ -106,6 +163,37 @@ interface RuleCondition {
   value: string
 }
 
+// ============ 派出流程配置选项 ============
+// 派出前 - 离校手续办理项
+const departureProcedureOptions = [
+  { value: "project_approval", label: "项目申请审批" },
+  { value: "mentor_sign", label: "辅导员/导师签字确认" },
+  { value: "status_change", label: "学籍异动办理" },
+  { value: "party_relation", label: "学院党/团支部关系办理" },
+  { value: "finance_settle", label: "财务结算确认" },
+  { value: "library_clear", label: "图书馆结清" },
+  { value: "dorm_service", label: "学生公寓服务办理" },
+]
+
+// 派出前 - 派出材料准备项
+const departureMaterialOptions = [
+  { value: "admission", label: "国(境)外录取通知书" },
+  { value: "visa", label: "签证材料" },
+  { value: "insurance", label: "境外保险证明" },
+  { value: "consent_letter", label: "定向学生同意派出函" },
+  { value: "safety_commitment", label: "安全责任书" },
+  { value: "emergency_contact", label: "紧急联系人确认书" },
+  { value: "itinerary", label: "行程信息" },
+]
+
+// 派出中 - 报告/汇报频率选项
+const reportFrequencyOptions = [
+  { value: "weekly", label: "每周一次" },
+  { value: "biweekly", label: "每两周一次" },
+  { value: "monthly", label: "每月一次" },
+  { value: "quarterly", label: "每季度一次" },
+]
+
 export default function ProjectPublishPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
@@ -114,11 +202,84 @@ export default function ProjectPublishPage() {
   const [projectName, setProjectName] = useState("")
   const [projectIntro, setProjectIntro] = useState("")
   const [projectType, setProjectType] = useState("")
+  const [projectLevel, setProjectLevel] = useState("") // 项目级别
+  const [hasProjectApproval, setHasProjectApproval] = useState("") // 是否立项
   const [duration, setDuration] = useState("short")
   const [applyMethod, setApplyMethod] = useState("online")
   const [isTop200, setIsTop200] = useState<string>("")
   const [applyTarget, setApplyTarget] = useState("")
+  const [dispatchType, setDispatchType] = useState("abroad") // 项目类型：出国/出境
+  const [continent, setContinent] = useState("") // 所在大洲
+  const [country, setCountry] = useState("") // 国家/地区
+  const [organization, setOrganization] = useState("") // 学校/组织
   const [materialDeadline, setMaterialDeadline] = useState("")
+
+  // 派出流程配置 - 派出前
+  const [selectedProcedures, setSelectedProcedures] = useState<string[]>(
+    departureProcedureOptions.map((o) => o.value)
+  )
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(
+    departureMaterialOptions.map((o) => o.value)
+  )
+  // 派出流程配置 - 派出中
+  const [requireLearningReport, setRequireLearningReport] = useState(true)
+  const [learningReportFrequency, setLearningReportFrequency] = useState("monthly")
+  const [requireSafetyReport, setRequireSafetyReport] = useState(true)
+  const [safetyReportFrequency, setSafetyReportFrequency] = useState("weekly")
+
+  const toggleProcedure = (value: string) => {
+    setSelectedProcedures((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+  const toggleMaterial = (value: string) => {
+    setSelectedMaterials((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+  
+  // 时间安排
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [applyDeadline, setApplyDeadline] = useState("")
+  
+  // 关联立项申报弹窗
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false)
+  const [applicationSearchKeyword, setApplicationSearchKeyword] = useState("")
+  const [selectedApplication, setSelectedApplication] = useState<typeof approvedApplications[0] | null>(null)
+  
+  // 筛选已通过审核的立项申报
+  const filteredApplications = approvedApplications.filter(app => 
+    app.projectName.includes(applicationSearchKeyword) || 
+    app.applyUnit.includes(applicationSearchKeyword)
+  )
+  
+  // 选择立项申报项目
+  const handleSelectApplication = (app: typeof approvedApplications[0]) => {
+    setSelectedApplication(app)
+    setProjectName(app.projectName)
+    setStartDate(app.startDate)
+    setEndDate(app.endDate)
+    setShowApplicationDialog(false)
+  }
+  
+  // 处理项目级别变化
+  const handleProjectLevelChange = (value: string) => {
+    setProjectLevel(value)
+    // 切换级别时重置是否立项及关联信息
+    setHasProjectApproval("")
+    setSelectedApplication(null)
+  }
+
+  // 处理是否立项变化
+  const handleHasApprovalChange = (value: string) => {
+    setHasProjectApproval(value)
+    if (value === "yes") {
+      setShowApplicationDialog(true)
+    } else {
+      setSelectedApplication(null)
+    }
+  }
   
   // Step 2: Pre-review Rules
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
@@ -318,6 +479,81 @@ export default function ProjectPublishPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
+                        <span className="text-destructive">*</span> 项目级别
+                      </Label>
+                      <Select value={projectLevel} onValueChange={handleProjectLevelChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择项目级别" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="department">处部/学院级项目</SelectItem>
+                          <SelectItem value="school">校级项目</SelectItem>
+                          <SelectItem value="national">国家级项目</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* 处部/学院级项目才显示"是否立项" */}
+                    {projectLevel === "department" && (
+                      <div className="space-y-2">
+                        <Label>
+                          <span className="text-destructive">*</span> 是否立项
+                        </Label>
+                        <Select value={hasProjectApproval} onValueChange={handleHasApprovalChange}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="请选择是否立项" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="yes">是</SelectItem>
+                            <SelectItem value="no">否</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 已关联的立项申报信息 */}
+                  {selectedApplication && projectLevel === "department" && hasProjectApproval === "yes" && (
+                    <Card className="bg-blue-50/50 border-blue-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2 text-primary">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm font-medium">已关联立项申报</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-7 text-xs"
+                            onClick={() => setShowApplicationDialog(true)}
+                          >
+                            更换
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">项目名称：</span>
+                            <span className="text-primary font-medium">{selectedApplication.projectName}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">申报单位：</span>
+                            <span>{selectedApplication.applyUnit}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">申报人：</span>
+                            <span>{selectedApplication.applicant}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">预算金额：</span>
+                            <span className="text-primary">¥{selectedApplication.totalCost.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>
                         <span className="text-destructive">*</span> 项目类别
                       </Label>
                       <Select value={projectType} onValueChange={setProjectType}>
@@ -332,6 +568,9 @@ export default function ProjectPublishPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
                         <span className="text-destructive">*</span> 项目时长
@@ -358,6 +597,9 @@ export default function ProjectPublishPage() {
 
                 <section className="space-y-4">
                   <h2 className="font-medium text-sm text-muted-foreground">时间安排</h2>
+                  {selectedApplication && projectLevel === "department" && hasProjectApproval === "yes" && (
+                    <p className="text-xs text-primary">* 已从关联的立项申报中自动填充时间信息</p>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -366,11 +608,21 @@ export default function ProjectPublishPage() {
                       </Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <Input type="date" placeholder="开始时间" />
+                          <Input 
+                            type="date" 
+                            placeholder="开始时间" 
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                          />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
                         <div className="relative flex-1">
-                          <Input type="date" placeholder="结束时间" />
+                          <Input 
+                            type="date" 
+                            placeholder="结束时间" 
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                          />
                           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
                       </div>
@@ -380,7 +632,12 @@ export default function ProjectPublishPage() {
                         <span className="text-destructive">*</span> 报名截止时间
                       </Label>
                       <div className="relative">
-                        <Input type="datetime-local" placeholder="请选择报名截止时间" />
+                        <Input 
+                          type="datetime-local" 
+                          placeholder="请选择报名截止时间" 
+                          value={applyDeadline}
+                          onChange={(e) => setApplyDeadline(e.target.value)}
+                        />
                         <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                       </div>
                     </div>
@@ -466,46 +723,261 @@ export default function ProjectPublishPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      <span className="text-destructive">*</span> 项目类型
+                    </Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={dispatchType === "abroad" ? "default" : "outline"}
+                        onClick={() => setDispatchType("abroad")}
+                        className="flex-1"
+                      >
+                        出国
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={dispatchType === "border" ? "default" : "outline"}
+                        onClick={() => setDispatchType("border")}
+                        className="flex-1"
+                      >
+                        出境
+                      </Button>
+                    </div>
+                  </div>
                 </section>
 
                 <section className="space-y-4">
-                  <h2 className="font-medium text-sm text-muted-foreground">地理位置与学校</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-medium text-sm text-muted-foreground">地理位置与学校</h2>
+                    {projectLevel === "national" && (
+                      <Badge variant="outline" className="text-xs">选填</Badge>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 国家/地区
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 所在大洲
                       </Label>
-                      <Select>
+                      <Select value={continent} onValueChange={setContinent}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择所在大洲" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="asia">亚洲</SelectItem>
+                          <SelectItem value="europe">欧洲</SelectItem>
+                          <SelectItem value="north-america">北美洲</SelectItem>
+                          <SelectItem value="south-america">南美洲</SelectItem>
+                          <SelectItem value="oceania">大洋洲</SelectItem>
+                          <SelectItem value="africa">非洲</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 国家/地区
+                      </Label>
+                      <Select value={country} onValueChange={setCountry}>
                         <SelectTrigger>
                           <SelectValue placeholder="请选择国家/地区" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="uk">英国</SelectItem>
-                          <SelectItem value="us">美国</SelectItem>
-                          <SelectItem value="de">德国</SelectItem>
-                          <SelectItem value="jp">日本</SelectItem>
-                          <SelectItem value="kr">韩国</SelectItem>
-                          <SelectItem value="au">澳大利亚</SelectItem>
+                          <SelectItem value="g-country">G国</SelectItem>
+                          <SelectItem value="a-country">A国</SelectItem>
+                          <SelectItem value="k-country">K国</SelectItem>
+                          <SelectItem value="c-country">C国</SelectItem>
+                          <SelectItem value="r-country">R国</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>
-                        <span className="text-destructive">*</span> 学校/组织
+                        {projectLevel !== "national" && <span className="text-destructive">*</span>} 学校/组织
                       </Label>
-                      <Select>
+                      <Select value={organization} onValueChange={setOrganization}>
                         <SelectTrigger>
                           <SelectValue placeholder="请选择学校/组织" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cambridge">剑桥大学</SelectItem>
-                          <SelectItem value="oxford">牛津大学</SelectItem>
-                          <SelectItem value="mit">麻省理工学院</SelectItem>
-                          <SelectItem value="tum">慕尼黑工业大学</SelectItem>
+                          <SelectItem value="cambridge">G国H大学</SelectItem>
+                          <SelectItem value="oxford">G国I大学</SelectItem>
+                          <SelectItem value="mit">A国N大学学院</SelectItem>
+                          <SelectItem value="tum">K国L大学</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
+                </section>
+
+                {/* 派出流程配置 */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Cog className="h-4 w-4 text-primary" />
+                    <h2 className="font-medium">派出流程配置</h2>
+                    <span className="text-xs text-muted-foreground">
+                      配置学生在派出前及派出中需提交的内容
+                    </span>
+                  </div>
+
+                  {/* 派出前阶段 */}
+                  <Card>
+                    <CardContent className="p-5 space-y-5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100">
+                          <Plane className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <h3 className="font-medium text-sm">派出前阶段</h3>
+                        <Badge variant="outline" className="text-xs">派出准备</Badge>
+                      </div>
+
+                      {/* 离校手续办理 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <ClipboardList className="h-4 w-4" />
+                          离校手续办理
+                          <span className="text-xs font-normal">
+                            （已选 {selectedProcedures.length}/{departureProcedureOptions.length}）
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {departureProcedureOptions.map((opt) => {
+                            const checked = selectedProcedures.includes(opt.value)
+                            return (
+                              <label
+                                key={opt.value}
+                                className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                                  checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                }`}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => toggleProcedure(opt.value)}
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 派出材料准备 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <FileText className="h-4 w-4" />
+                          派出材料准备
+                          <span className="text-xs font-normal">
+                            （已选 {selectedMaterials.length}/{departureMaterialOptions.length}）
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {departureMaterialOptions.map((opt) => {
+                            const checked = selectedMaterials.includes(opt.value)
+                            return (
+                              <label
+                                key={opt.value}
+                                className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                                  checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                }`}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={() => toggleMaterial(opt.value)}
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 派出中阶段 */}
+                  <Card>
+                    <CardContent className="p-5 space-y-5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100">
+                          <CalendarClock className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <h3 className="font-medium text-sm">派出中阶段</h3>
+                        <Badge variant="outline" className="text-xs">在外期间</Badge>
+                      </div>
+
+                      {/* 学习报告 */}
+                      <div className="rounded-lg border p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">学生需提交学习报告</span>
+                          </div>
+                          <Switch
+                            checked={requireLearningReport}
+                            onCheckedChange={setRequireLearningReport}
+                          />
+                        </div>
+                        {requireLearningReport && (
+                          <div className="flex items-center gap-3 pl-6">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">
+                              提交频率
+                            </Label>
+                            <Select
+                              value={learningReportFrequency}
+                              onValueChange={setLearningReportFrequency}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="请选择提交频率" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {reportFrequencyOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 安全汇报 */}
+                      <div className="rounded-lg border p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">学生需进行安全汇报</span>
+                          </div>
+                          <Switch
+                            checked={requireSafetyReport}
+                            onCheckedChange={setRequireSafetyReport}
+                          />
+                        </div>
+                        {requireSafetyReport && (
+                          <div className="flex items-center gap-3 pl-6">
+                            <Label className="text-sm text-muted-foreground whitespace-nowrap">
+                              汇报频率
+                            </Label>
+                            <Select
+                              value={safetyReportFrequency}
+                              onValueChange={setSafetyReportFrequency}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="请选择汇报频率" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {reportFrequencyOptions.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </section>
 
                 <div className="flex justify-center gap-4 pt-4 border-t">
@@ -568,7 +1040,7 @@ export default function ProjectPublishPage() {
                 <section className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Cog className="h-4 w-4 text-primary" />
-                    <h2 className="font-medium">规则条件配置</h2>
+                    <h2 className="font-medium">规���条件配置</h2>
                     <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">核心部分</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">配置审核规则条件，数据来源于学生申请时填写提交的信息。AND表示必须同时满足，OR表示满足其一即可。</p>
@@ -777,7 +1249,7 @@ export default function ProjectPublishPage() {
                     </div>
                     
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">规则类型：</span>{ruleType === "filter" ? "筛选规则（通过/不通过）" : "评分规则（计算分数）"}</p>
+                      <p><span className="font-medium">规则类型：</span>{ruleType === "filter" ? "筛选规则（通过/不通过）" : "评分��则（计算分数）"}</p>
                       <p><span className="font-medium">应用范围：</span>所有申请学生</p>
                       <p><span className="font-medium">判断条件：</span>{generateRulePreview()}</p>
                       {ruleType === "score" && <p><span className="font-medium">规则权重：</span>{ruleWeight[0]}%</p>}
@@ -859,7 +1331,7 @@ export default function ProjectPublishPage() {
             </div>
           </div>
           <div className="border rounded-lg p-3 space-y-2">
-            <h4 className="font-medium text-sm">2025寒假韩国建国大学项目</h4>
+            <h4 className="font-medium text-sm">2025寒假A国建国大学项目</h4>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span>报名: <span className="font-medium text-foreground">47人</span></span>
               <span>通过率: <span className="font-medium text-foreground">81%</span></span>
@@ -867,6 +1339,107 @@ export default function ProjectPublishPage() {
           </div>
         </div>
       </AIAssistantPanel>
+
+      {/* 选择立项申报弹窗 */}
+      <Dialog open={showApplicationDialog} onOpenChange={setShowApplicationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              查询已通过审核的立项申报
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="请输入项目名称或申报单位关键词..."
+                  className="pl-9"
+                  value={applicationSearchKeyword}
+                  onChange={(e) => setApplicationSearchKeyword(e.target.value)}
+                />
+              </div>
+              <Button>
+                <Search className="h-4 w-4 mr-1" />
+                搜索
+              </Button>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              可关联的立项申报（点击选择）
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {filteredApplications.map((app) => (
+                <Card 
+                  key={app.id} 
+                  className={`cursor-pointer transition-colors hover:border-primary ${
+                    selectedApplication?.id === app.id ? "border-primary bg-primary/5" : ""
+                  }`}
+                  onClick={() => handleSelectApplication(app)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-primary">{app.projectName}</span>
+                          <Badge variant="outline" className="text-green-600 border-green-300">已通过</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5" />
+                            {app.applyUnit}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            {app.applicant}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            申报时间：{app.applyTime}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span>
+                            派出时间：<span className="text-primary">{app.startDate}</span> 至 <span className="text-primary">{app.endDate}</span>
+                          </span>
+                          <span>
+                            预计人数：<span className="font-medium">{app.totalStudents}人</span>
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm"
+                        variant={selectedApplication?.id === app.id ? "default" : "outline"}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSelectApplication(app)
+                        }}
+                      >
+                        选择
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {filteredApplications.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  没有找到匹配的立项申报项目
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowApplicationDialog(false)}>
+                取消
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

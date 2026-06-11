@@ -45,9 +45,9 @@ const taskDetail = {
   phone: "138****5678",
   email: "liming@university.edu.cn",
   project: {
-    name: "韩国忠南大学奖学金交换生项目(2026)",
-    school: "韩国忠南大学",
-    country: "韩国",
+    name: "A国B大学奖学金交换生项目(2026)",
+    school: "A国B大学",
+    country: "A国",
     duration: "2026-09-01 至 2027-01-15",
     type: "交换生项目"
   },

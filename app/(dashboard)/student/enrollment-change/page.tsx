@@ -49,8 +49,8 @@ export default function EnrollmentChangePage() {
     college: "计算机科学与技术学院",
     major: "计算机科学与技术",
     grade: "大三",
-    project: "2026年《中美人才培养计划》1+2+1双学位项目",
-    targetSchool: "美国特洛伊大学",
+    project: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    targetSchool: "A国某大学",
     duration: "2026-09-01 至 2028-06-30"
   }
 

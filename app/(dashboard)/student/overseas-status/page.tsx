@@ -41,9 +41,9 @@ export default function OverseasStatusPage() {
   const [arrivalDate, setArrivalDate] = useState<Date>()
   
   const projectInfo = {
-    name: "2026年《中美人才培养计划》1+2+1双学位项目",
-    targetSchool: "美国特洛伊大学",
-    country: "美国",
+    name: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    targetSchool: "A国某大学",
+    country: "A国",
     city: "特洛伊市",
     startDate: "2026-09-01",
     endDate: "2028-06-30"

@@ -92,8 +92,8 @@ export default function ReturnRegisterPage() {
   const progress = ((completedCount + 0.5) / returnTasks.length) * 100
 
   const projectInfo = {
-    name: "2026年《中美人才培养计划》1+2+1双学位项目",
-    targetSchool: "美国特洛伊大学",
+    name: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    targetSchool: "A国某大学",
     departureDate: "2026-09-01",
     returnDate: "2028-06-30",
     duration: "22个月"

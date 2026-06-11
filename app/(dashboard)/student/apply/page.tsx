@@ -19,7 +19,7 @@ import Link from "next/link"
 const projects = [
   {
     id: 1,
-    name: "2026年《中美人才培养计划》1+2+1双学位项目和YES非学位项目",
+    name: "2026年《A国B国人才培养计划》1+2+1双学位项目和YES非学位项目",
     type: "热门项目",
     tags: ["强力推荐", "高成功率"],
     matchScore: 95,
@@ -34,7 +34,7 @@ const projects = [
   },
   {
     id: 2,
-    name: "(亚洲地区)2026年秋季学期第三批交换生项目",
+    name: "2026年秋季学期第三批交换生项目",
     type: "交换生",
     tags: ["强力推荐", "高质量"],
     matchScore: 88,
@@ -242,7 +242,7 @@ export default function StudentApplyPage() {
           </h4>
           
           <AIRecommendation
-            title="2026年《中美人才培养计划》1+2+1双学位项目和YES非学位项目"
+            title="2026年《A国B国人才培养计划》1+2+1双学位项目和YES非学位项目"
             stats={[
               { label: "双学位项目，含金量高，您的学术背景完全符合", value: "" }
             ]}
@@ -252,7 +252,7 @@ export default function StudentApplyPage() {
           <Badge variant="outline" className="w-full justify-center py-1">推荐2</Badge>
           
           <AIRecommendation
-            title="(亚洲地区)2026年秋季学期第三批交换生项目"
+            title="2026年秋季学期第三批交换生项目"
             stats={[
               { label: "性价比高，传媒资源丰富，适合专业发展", value: "" }
             ]}

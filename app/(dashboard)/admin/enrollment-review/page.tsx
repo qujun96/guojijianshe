@@ -51,7 +51,7 @@ const applications: EnrollmentApplication[] = [
     studentId: "2022010001",
     studentType: "本科生",
     college: "计算机科学与技术学院",
-    project: "中美人才培养计划",
+    project: "A国B国人才培养计划",
     changeType: "保留学籍",
     applyDate: "2026-08-15",
     status: "pending"
@@ -73,7 +73,7 @@ const applications: EnrollmentApplication[] = [
     studentId: "2022010003",
     studentType: "本科生",
     college: "经济管理学院",
-    project: "韩国交换项目",
+    project: "A国交换项目",
     changeType: "联合培养",
     applyDate: "2026-08-13",
     status: "syncing"

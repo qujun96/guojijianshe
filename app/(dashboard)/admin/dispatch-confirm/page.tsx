@@ -57,7 +57,7 @@ const dispatchStudents = [
     studentId: "20220101001",
     department: "美视电影学院",
     projectName: "(亚洲地区) 2026年秋季学期第三批交换生项目",
-    targetSchool: "东京大学",
+    targetSchool: "C国Y大学",
     dispatchTime: "2026-08-25 至 2026-12-24",
     reviewStatus: "已通过",
     confirmStatus: "待确认",
@@ -69,8 +69,8 @@ const dispatchStudents = [
     studentName: "李明华",
     studentId: "20220101015",
     department: "计算机学院",
-    projectName: "2026年《中美人才培养计划》1+2+1双学位项目",
-    targetSchool: "加州大学伯克利分校",
+    projectName: "2026年《A国B国人才培养计划》1+2+1双学位项目",
+    targetSchool: "A国X大学",
     dispatchTime: "2026-09-01 至 2028-06-30",
     reviewStatus: "已通过",
     confirmStatus: "待确认",
@@ -83,7 +83,7 @@ const dispatchStudents = [
     studentId: "20220101028",
     department: "外国语学院",
     projectName: "(欧洲地区)2026年秋季学期第二批交换生项目",
-    targetSchool: "剑桥大学",
+    targetSchool: "G国H大学",
     dispatchTime: "2026-09-15 至 2027-01-15",
     reviewStatus: "已通过",
     confirmStatus: "已确认",
@@ -95,8 +95,8 @@ const dispatchStudents = [
     studentName: "刘思远",
     studentId: "20220101042",
     department: "经济管理学院",
-    projectName: "韩国忠南大学奖学金交换生项目(2026)",
-    targetSchool: "韩国忠南大学",
+    projectName: "A国B大学奖学金交换生项目(2026)",
+    targetSchool: "A国B大学",
     dispatchTime: "2026-09-01 至 2026-12-31",
     reviewStatus: "已通过",
     confirmStatus: "待确认",
@@ -108,8 +108,8 @@ const dispatchStudents = [
     studentName: "陈晓燕",
     studentId: "20220101056",
     department: "艺术设计学院",
-    projectName: "布里斯托3+1本硕连读",
-    targetSchool: "英国布里斯托大学",
+    projectName: "E国F大学3+1本硕连读",
+    targetSchool: "E国F大学",
     dispatchTime: "2026-09-01 至 2027-06-30",
     reviewStatus: "已通过",
     confirmStatus: "已放弃",
@@ -124,12 +124,15 @@ export default function DispatchConfirmPage() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [isBatchConfirmDialogOpen, setIsBatchConfirmDialogOpen] = useState(false)
   const [isNotifyDialogOpen, setIsNotifyDialogOpen] = useState(false)
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
+  const [transferLeader, setTransferLeader] = useState("")
+  const [isBatchMode, setIsBatchMode] = useState(false)
   const [currentStudent, setCurrentStudent] = useState<typeof dispatchStudents[0] | null>(null)
 
   const filteredStudents = dispatchStudents.filter(student => {
     if (tab === "pending") return student.confirmStatus === "待确认"
     if (tab === "confirmed") return student.confirmStatus === "已确认"
-    if (tab === "abandoned") return student.confirmStatus === "已放弃"
     return true
   })
 
@@ -162,6 +165,32 @@ export default function DispatchConfirmPage() {
     setIsNotifyDialogOpen(true)
   }
 
+  const handleReturn = (student: typeof dispatchStudents[0]) => {
+    setCurrentStudent(student)
+    setIsBatchMode(false)
+    setIsReturnDialogOpen(true)
+  }
+
+  const handleTransfer = (student: typeof dispatchStudents[0]) => {
+    setCurrentStudent(student)
+    setIsBatchMode(false)
+    setTransferLeader("")
+    setIsTransferDialogOpen(true)
+  }
+
+  const handleBatchReturn = () => {
+    setCurrentStudent(null)
+    setIsBatchMode(true)
+    setIsReturnDialogOpen(true)
+  }
+
+  const handleBatchTransfer = () => {
+    setCurrentStudent(null)
+    setIsBatchMode(true)
+    setTransferLeader("")
+    setIsTransferDialogOpen(true)
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "待确认":
@@ -181,8 +210,7 @@ export default function DispatchConfirmPage() {
         {/* Tab Buttons */}
         <div className="flex gap-2">
           <Button 
-            variant={tab === "pending" ? "outline" : "ghost"}
-            className={tab === "pending" ? "border-primary text-primary" : ""}
+            variant={tab === "pending" ? "default" : "ghost"}
             onClick={() => setTab("pending")}
           >
             待确认
@@ -197,15 +225,6 @@ export default function DispatchConfirmPage() {
             已确认
             <Badge variant="secondary" className="ml-2">
               {dispatchStudents.filter(s => s.confirmStatus === "已确认").length}
-            </Badge>
-          </Button>
-          <Button 
-            variant={tab === "abandoned" ? "default" : "ghost"}
-            onClick={() => setTab("abandoned")}
-          >
-            已放弃
-            <Badge variant="secondary" className="ml-2">
-              {dispatchStudents.filter(s => s.confirmStatus === "已放弃").length}
             </Badge>
           </Button>
         </div>
@@ -228,9 +247,9 @@ export default function DispatchConfirmPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部院校</SelectItem>
-                  <SelectItem value="tokyo">东京大学</SelectItem>
-                  <SelectItem value="berkeley">加州大学伯克利分校</SelectItem>
-                  <SelectItem value="cambridge">剑桥大学</SelectItem>
+                  <SelectItem value="tokyo">C国Y大学</SelectItem>
+                  <SelectItem value="berkeley">A国X大学</SelectItem>
+                  <SelectItem value="cambridge">G国H大学</SelectItem>
                 </SelectContent>
               </Select>
               <Button className="gap-2">
@@ -254,13 +273,17 @@ export default function DispatchConfirmPage() {
               </div>
               {tab === "pending" && selectedStudents.length > 0 && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-2" onClick={handleNotify}>
-                    <Send className="h-4 w-4" />
-                    批量通知
-                  </Button>
                   <Button size="sm" className="gap-2" onClick={handleBatchConfirm}>
                     <CheckCircle2 className="h-4 w-4" />
                     批量确认派出
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 text-amber-600" onClick={handleBatchReturn}>
+                    <RotateCcw className="h-4 w-4" />
+                    批量退回修改信息
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 text-blue-600" onClick={handleBatchTransfer}>
+                    <Send className="h-4 w-4" />
+                    批量转领导
                   </Button>
                 </div>
               )}
@@ -340,8 +363,21 @@ export default function DispatchConfirmPage() {
                             >
                               确认派出
                             </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-muted-foreground">
-                              通知
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 text-amber-600"
+                              onClick={() => handleReturn(student)}
+                            >
+                              退回修改信息
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 text-blue-600"
+                              onClick={() => handleTransfer(student)}
+                            >
+                              转领导
                             </Button>
                           </>
                         )}
@@ -556,6 +592,123 @@ export default function DispatchConfirmPage() {
             <Button onClick={() => setIsNotifyDialogOpen(false)} className="gap-2">
               <Send className="h-4 w-4" />
               发送通知
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Return Dialog */}
+      <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isBatchMode ? "批量退回修改信息" : "退回修改信息"}</DialogTitle>
+            <DialogDescription>
+              {isBatchMode
+                ? `将所选 ${selectedStudents.length} 名学生的派出信息退回，由学生修改后重新提交确认`
+                : `将 ${currentStudent?.studentName} 的派出信息退回，由学生修改后重新提交确认`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              {isBatchMode ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">退回学生</span>
+                  <span className="font-medium">共 {selectedStudents.length} 名</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">学生姓名</span>
+                    <span className="font-medium">{currentStudent?.studentName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">项目名称</span>
+                    <span className="font-medium">{currentStudent?.projectName}</span>
+                  </div>
+                </>
+              )}
+            </div>
+            <div>
+              <Label>退回原因<span className="text-destructive"> *</span></Label>
+              <Textarea 
+                placeholder="请说明需要修改的内容及原因，便于学生准确修改" 
+                className="mt-2"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReturnDialogOpen(false)}>取消</Button>
+            <Button variant="destructive" onClick={() => setIsReturnDialogOpen(false)} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              确认退回
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isBatchMode ? "批量转领导" : "转领导"}</DialogTitle>
+            <DialogDescription>
+              {isBatchMode
+                ? `将所选 ${selectedStudents.length} 名学生的派出确认转交给领导审批`
+                : `将 ${currentStudent?.studentName} 的派出确认转交给领导审批`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              {isBatchMode ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">转交学生</span>
+                  <span className="font-medium">共 {selectedStudents.length} 名</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">学生姓名</span>
+                    <span className="font-medium">{currentStudent?.studentName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">目标院校</span>
+                    <span className="font-medium">{currentStudent?.targetSchool}</span>
+                  </div>
+                </>
+              )}
+            </div>
+            <div>
+              <Label>转交领导<span className="text-destructive"> *</span></Label>
+              <Select value={transferLeader} onValueChange={setTransferLeader}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="请选择转交的领导" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="zhang">张处长 - 国际交流处</SelectItem>
+                  <SelectItem value="li">李副处长 - 国际交流处</SelectItem>
+                  <SelectItem value="wang">王主任 - 学院分管领导</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>转交说明</Label>
+              <Textarea 
+                placeholder="请输入转交说明（可选）" 
+                className="mt-2"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTransferDialogOpen(false)}>取消</Button>
+            <Button 
+              disabled={!transferLeader}
+              onClick={() => setIsTransferDialogOpen(false)} 
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              确认转交
             </Button>
           </DialogFooter>
         </DialogContent>
